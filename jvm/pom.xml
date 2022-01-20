@@ -376,6 +376,7 @@
                         <argument>${arrow_root}</argument>
                         <argument>${jvm.arrow.bfs.install.dir}</argument>
                         <argument>${build_jemalloc}</argument>
+                        <argument>${clean_cpp}</argument>
                     </arguments>
                 </configuration>
             </execution>
