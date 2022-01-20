@@ -10,6 +10,7 @@ BUILD_PROTOBUF=${5:-ON}
 ARROW_ROOT=${6:-/usr/local}
 ARROW_BFS_INSTALL_DIR=${7}
 BUILD_JEMALLOC=${8:-ON}
+CLEAN_CPP=${9:-ON}
 
 echo "CMAKE Arguments:"
 echo "BUILD_CPP=${BUILD_CPP}"
@@ -20,16 +21,17 @@ echo "BUILD_PROTOBUF=${BUILD_PROTOBUF}"
 echo "ARROW_ROOT=${ARROW_ROOT}"
 echo "ARROW_BUILD_FROM_SOURCE_INSTALL_DIR=${ARROW_BFS_INSTALL_DIR}"
 echo "BUILD_JEMALLOC=${BUILD_JEMALLOC}"
+echo "CLEAN_CPP=${CLEAN_CPP}"
 
 CURRENT_DIR=$(cd "$(dirname "$BASH_SOURCE")"; pwd)
 echo $CURRENT_DIR
 cd ${CURRENT_DIR}
-if [ -d build ]; then
+if [ -d build  -a "$CLEAN_CPP" != "OFF" ]; then
     rm -r build
 fi
 
 if [ $BUILD_CPP == "ON" ]; then
-mkdir build
+mkdir -p build
 cd build
 cmake .. -DTESTS=${TESTS} -DBUILD_ARROW=${BUILD_ARROW} -DSTATIC_ARROW=${STATIC_ARROW} -DBUILD_PROTOBUF=${BUILD_PROTOBUF} -DARROW_ROOT=${ARROW_ROOT} -DARROW_BFS_INSTALL_DIR=${ARROW_BFS_INSTALL_DIR} -DBUILD_JEMALLOC=${BUILD_JEMALLOC}
 make -j2
