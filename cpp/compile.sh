@@ -31,14 +31,18 @@ if [ -d build  -a "$CLEAN_CPP" != "OFF" ]; then
 fi
 
 if [ $BUILD_CPP == "ON" ]; then
-mkdir -p build
-cd build
-cmake .. -DTESTS=${TESTS} -DBUILD_ARROW=${BUILD_ARROW} -DSTATIC_ARROW=${STATIC_ARROW} -DBUILD_PROTOBUF=${BUILD_PROTOBUF} -DARROW_ROOT=${ARROW_ROOT} -DARROW_BFS_INSTALL_DIR=${ARROW_BFS_INSTALL_DIR} -DBUILD_JEMALLOC=${BUILD_JEMALLOC}
-make -j2
+    if [ "$(which ctags)" != "" ]; then
+        ctags -R
+    fi
 
-set +eu
+    mkdir -p build
+    cd build
+    cmake .. -DTESTS=${TESTS} -DBUILD_ARROW=${BUILD_ARROW} -DSTATIC_ARROW=${STATIC_ARROW} -DBUILD_PROTOBUF=${BUILD_PROTOBUF} -DARROW_ROOT=${ARROW_ROOT} -DARROW_BFS_INSTALL_DIR=${ARROW_BFS_INSTALL_DIR} -DBUILD_JEMALLOC=${BUILD_JEMALLOC}
+    make -j2
 
-make -j2
+    set +eu
 
-set +eu
+    make -j2
+
+    set +eu
 fi
