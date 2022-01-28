@@ -43,6 +43,8 @@
 
 namespace {
 
+static bool verbose = true;
+
 #define JNI_METHOD_START try {
 // macro ended
 
@@ -353,7 +355,7 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeCreateKernelWi
   // Get the ws iter
   gandiva::ExpressionVector ws_expr_vector;
   gandiva::FieldVector ws_ret_types;
-  std::cout << "start to parse" << std::endl;
+  if (verbose) std::cout << "start to parse" << std::endl;
   std::shared_ptr<ResultIterator<arrow::RecordBatch>> res_iter;
   msg = ParseSubstraitPlan(env, ws_exprs_arr, &ws_expr_vector, &ws_ret_types, &res_iter);
   if (!msg.ok()) {
@@ -362,30 +364,42 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeCreateKernelWi
     env->ThrowNew(io_exception_class, error_message.c_str());
   }
   auto ws_result_iterator = std::dynamic_pointer_cast<ResultIteratorBase>(res_iter);
-  return batch_iterator_holder_.Insert(std::move(ws_result_iterator));
+  jlong handle =  batch_iterator_holder_.Insert(std::move(ws_result_iterator));
+  if (verbose) std::cout << "CreateKernelWithIterator - handle: " << handle << std::endl;
+  return handle;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeHasNext(
     JNIEnv* env, jobject obj, jlong id) {
   JNI_METHOD_START
+  if (verbose) std::cout << "Java_com_intel_oap_vectorized_BatchIterator_nativeHasNext with " << id << std::endl;
   auto iter = GetBatchIterator(env, id);
   if (iter == nullptr) {
     std::string error_message = "faked to get batch iterator";
     JniThrow(error_message);
   }
-  return iter->HasNext();
+  jboolean hasNext = iter->HasNext();
+  if (verbose) std::cout << "HasNext(" << id << "): " << hasNext << std::endl;
+  return hasNext;
   JNI_METHOD_END(false)
 }
 
 JNIEXPORT jobject JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeNext(
     JNIEnv* env, jobject obj, jlong id) {
   JNI_METHOD_START
+  if (verbose) std::cout << "Java_com_intel_oap_vectorized_BatchIterator_nativeNext with " << id << std::endl;
   auto iter = GetBatchIterator<arrow::RecordBatch>(env, id);
   std::shared_ptr<arrow::RecordBatch> out;
   if (!iter->HasNext()) return nullptr;
   JniAssertOkOrThrow(iter->Next(&out), "nativeNext: get Next() failed");
   jbyteArray serialized_record_batch =
       JniGetOrThrow(ToBytes(env, out), "Error deserializing message");
+  if (verbose) {
+      std::cout << "Next RecordBatch cols: " << out->num_columns() << " rows: " << out->num_rows() << std::endl;
+      for (int i = 0; i < out->num_columns(); i++) {
+          std::cout << "Column " << i << ": " << out->column_name(i) << std::endl;
+      }
+  }
   return serialized_record_batch;
   JNI_METHOD_END(nullptr)
 }
