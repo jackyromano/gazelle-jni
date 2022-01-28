@@ -23,8 +23,10 @@
 #include "arrow/array/builder_primitive.h"
 #include "arrow/util/checked_cast.h"
 
+static bool verbose = true;
+
 SubstraitParser::SubstraitParser() {
-  std::cout << "construct SubstraitParser" << std::endl;
+  if (verbose) std::cout << "construct SubstraitParser" << std::endl;
 }
 
 std::shared_ptr<ResultIterator<arrow::RecordBatch>> SubstraitParser::getResIter() {
@@ -58,7 +60,7 @@ void SubstraitParser::ParseScalarFunction(
   }
   auto function_id = sfunc.function_reference();
   auto function_name = FindFunction(function_id);
-  std::cout << "function_name: " << function_name << std::endl;
+  if (verbose) std::cout << "function_name: " << function_name << std::endl;
   auto out_type = sfunc.output_type();
   ParseType(out_type);
 }
@@ -114,7 +116,7 @@ void SubstraitParser::ParseExpression(const substrait::Expression& sexpr) {
       break;
     }
     default:
-      std::cout << "Expression not supported" << std::endl;
+      if (verbose) std::cout << "Expression " << sexpr.rex_type_case() << " not supported... ignored" << std::endl;
       break;
   }
 }
@@ -155,8 +157,10 @@ void SubstraitParser::ParseType(const substrait::Type& stype) {
 
 void SubstraitParser::ParseNamedStruct(const substrait::NamedStruct& named_struct) {
   auto& snames = named_struct.names();
-  for (auto& sname : snames) {
-    std::cout << "NamedStruct name: " << sname << std::endl;
+  if (verbose) {
+    for (auto& sname : snames) {
+      std::cout << "NamedStruct name: " << sname << std::endl;
+    }
   }
   // Parse Struct
   auto& sstruct = named_struct.struct_();
@@ -231,24 +235,38 @@ void SubstraitParser::ParseReadRel(const substrait::ReadRel& sread) {
 
 void SubstraitParser::ParseRel(const substrait::Rel& srel) {
   if (srel.has_aggregate()) {
+    if (verbose) std::cout << "ParseRel Aggregate" << std::endl;
     ParseAggregateRel(srel.aggregate());
   } else if (srel.has_project()) {
+    if (verbose) std::cout << "ParseRel Project" << std::endl;
     ParseProjectRel(srel.project());
   } else if (srel.has_filter()) {
+    if (verbose) std::cout << "ParseRel Filter" << std::endl;
     ParseFilterRel(srel.filter());
   } else if (srel.has_read()) {
+    if (verbose) std::cout << "ParseRel Read" << std::endl;
     ParseReadRel(srel.read());
   } else {
-    std::cout << "not supported" << std::endl;
+    if (verbose) std::cout << "not supported" << std::endl;
   }
 }
 
 void SubstraitParser::ParseRelRoot(const substrait::RelRoot& sroot) {
+  if (verbose) std::cout << "ParseRelRoot" << std::endl;
   if (sroot.has_input()) {
     auto& srel = sroot.input();
     ParseRel(srel);
   }
-  auto& snames = sroot.names();
+  if (verbose) {
+    auto& snames = sroot.names();
+    if (snames.size() == 0) {
+      std::cout << "ParseRelRoot has no names" << std::endl;
+    } else {
+      for (auto const & n : snames) {
+        std::cout << "ParseRelRoot : " << n << std::endl;
+      }
+    }
+  }
 }
 
 void SubstraitParser::ParsePlan(const substrait::Plan& splan) {
@@ -260,7 +278,7 @@ void SubstraitParser::ParsePlan(const substrait::Plan& splan) {
     auto id = sfmap.function_anchor();
     auto name = sfmap.name();
     functions_map_[id] = name;
-    std::cout << "Function id: " << id << ", name: " << name << std::endl;
+    if (verbose) std::cout << "Function id: " << id << ", name: " << name << std::endl;
   }
   for (auto& srel : splan.relations()) {
     if (srel.has_root()) {
