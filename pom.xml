@@ -32,6 +32,7 @@
   <modules>
     <module>jvm</module>
     <module>shims</module>
+    <module>xiphos-spark-integration</module>
   </modules>
 
   <profiles>
