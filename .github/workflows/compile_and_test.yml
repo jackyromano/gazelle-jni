@@ -8,7 +8,5 @@ jobs:
       http_proxy : http://proxy-chain.intel.com:911
       https_proxy : http://proxy-chain.intel.com:912
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
       - run: echo "hello world"
 
