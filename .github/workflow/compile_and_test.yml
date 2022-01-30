@@ -1,0 +1,12 @@
+name: GitHub Actions Demo
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: [self-hosted]
+    env:
+      WORKSPACE : ${{github.workspace}}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: echo "hello world"
+
