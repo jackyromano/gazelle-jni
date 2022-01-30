@@ -5,6 +5,10 @@ jobs:
     runs-on: [self-hosted]
     env:
       WORKSPACE : ${{github.workspace}}
+      HTTP_PROXY : http://proxy-chain.intel.com:911
+      HTTPS_PROXY : http://proxy-chain.intel.com:912
+      http_proxy : http://proxy-chain.intel.com:911
+      https_proxy : http://proxy-chain.intel.com:912
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
