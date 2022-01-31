@@ -9,6 +9,7 @@ jobs:
       https_proxy : http://proxy-chain.intel.com:912
     steps:
       - run: echo "Get started"
+      - run: echo "Dummy command"
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: echo "hello world"
