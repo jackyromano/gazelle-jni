@@ -1,12 +1,32 @@
 name: GitHub Actions Demo
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  build_docker:
+      runs-on: [self-hosted]
+      outputs:
+          image_name: localhost:5000/gazelle-jni-ci-image
+      container:
+        image: ubit-artifactory-il.intel.com:6561/bsr/docker-git:1.0
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+      steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: docker build -t localhost:5000/gazelle-jni-ci-image  tools/build_docker
+      - run: docker push localhost:5000/gazelle-jni-ci-image  
+
+  build:
     runs-on: [self-hosted]
+    needs: build_docker
+    container: 
+      image: ${{needs.build_docker.outputs.image_name}}
     env:
       WORKSPACE : ${{github.workspace}}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: echo "hello world"
+      - uses: jfrog/setup-jfrog-cli@v2
+      - run: jfrog --version
+      - run: tools/build_gazelle_jni.sh
+      - run: tools/run_tests.sh
 
