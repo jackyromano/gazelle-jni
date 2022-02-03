@@ -52,7 +52,7 @@
 <build>
     <plugins>
         <!--
-    Plugin for launching the Makefile to create smtp-logview .a lib
+    Plugin for launching the Makefile
 -->
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
