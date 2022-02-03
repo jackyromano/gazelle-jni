@@ -1,0 +1,5 @@
+export JAVA_HOME=$OLD_JAVA_HOME
+export LD_LIBRARY_PATH=$OLD_LD_LIBRARY_PATH
+unset w
+unalias b
+unalias t

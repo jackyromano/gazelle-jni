@@ -1,0 +1,18 @@
+export DEV_DOCKER=gazelle-jni-$(whoami)
+export OLD_JAVA_HOME=$JAVA_HOME
+echo "OS: $OS"
+if [ "$OS" == "Darwin" ]; then
+    export JAVA_HOME="/usr/local/Cellar/openjdk@8/1.8.0+312/libexec/openjdk.jdk/Contents/Home"
+elif [ "$OS" == "Linux" ]; then
+    export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+else 
+    echo "Unknown OS"
+fi
+
+echo "JAVA set to version $(javac -version)"
+export OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${WORKSPACE}/components/xiphos-datasource/cpp/build
+
+export w=$WORKSPACE
+alias b='$WORKSPACE/tools/build_gazelle_jni.sh -p'
+alias t='$WORKSPACE/scripts/jni_shell < $WORKSPACE/tests/gazelle_jni_test.scala'

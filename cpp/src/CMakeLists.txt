@@ -510,3 +510,4 @@ install(FILES ${source_root_directory}/resources/libhdfs.so
         DESTINATION ${LIBHDFS3_DESTINATION})
 install(FILES ${source_root_directory}/resources/libprotobuf.so.13
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
+add_subdirectory(plan_tester)

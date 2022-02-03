@@ -33,6 +33,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <mutex>
+#include <fstream>
 
 #include "proto/protobuf_utils.h"
 #include "proto/substrait_utils.h"
@@ -333,6 +335,29 @@ arrow::Status MakeExprVector(JNIEnv* env, jbyteArray exprs_arr,
   return arrow::Status::OK();
 }
 
+void ExportBytes(const uint8_t *bytes, size_t len)
+{
+  static int plan_id = 0;
+  static std::mutex s_mutex;
+  if (getenv("GAZELLE_JNI_PLAN") == nullptr) return;
+
+  {
+    std::lock_guard<std::mutex> guard(s_mutex);
+    plan_id++;
+  }
+
+  std::string base_filename = std::string(getenv("GAZELLE_JNI_PLAN"));
+  std::string filename = base_filename + "_" + std::to_string(plan_id) + ".substrait";
+  std::cout << "Exporting plan to: " << filename << std::endl;
+  std::ofstream fp(filename, std::ios::out | std::ios::binary);
+  if (!fp) {
+    perror(filename.c_str());
+    return;
+  }
+  fp.write((const char *)bytes, len);
+  fp.close();
+}
+
 arrow::Status ParseSubstraitPlan(
     JNIEnv* env, jbyteArray exprs_arr, gandiva::ExpressionVector* expr_vector,
     gandiva::FieldVector* ret_types,
@@ -341,6 +366,7 @@ arrow::Status ParseSubstraitPlan(
   jsize exprs_len = env->GetArrayLength(exprs_arr);
   jbyte* exprs_bytes = env->GetByteArrayElements(exprs_arr, 0);
 
+  ExportBytes(reinterpret_cast<uint8_t *>(exprs_bytes), exprs_len);
   if (!ParseProtobuf(reinterpret_cast<uint8_t*>(exprs_bytes), exprs_len, &ws_plan)) {
     env->ReleaseByteArrayElements(exprs_arr, exprs_bytes, JNI_ABORT);
     return arrow::Status::UnknownError("Unable to parse");
