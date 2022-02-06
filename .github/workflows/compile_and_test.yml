@@ -30,6 +30,6 @@ jobs:
         uses: actions/checkout@v2
       - uses: jfrog/setup-jfrog-cli@v2
       - run: jfrog --version
-      - run: tools/build_gazelle_jni.sh
+      - run: tools/build_gazelle_jni.sh --batch
       - run: tools/run_tests.sh
 
