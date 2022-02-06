@@ -1,5 +1,12 @@
-name: GitHub Actions Demo
-on: [push]
+name: Xiphos integration CI
+on:
+  pull_request:
+    types:
+      - opened
+    branches:
+      - 'xiphos-integration'
+      - 'master'
+
 jobs:
   build_docker:
       runs-on: [self-hosted]
