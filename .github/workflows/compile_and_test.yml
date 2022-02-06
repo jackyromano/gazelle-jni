@@ -5,10 +5,6 @@ jobs:
       runs-on: [self-hosted]
       outputs:
           image_name: localhost:5000/gazelle-jni-ci-image:latest
-      container:
-        image: ubit-artifactory-il.intel.com:6561/bsr/docker-git:1.0
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
       steps:
       - name: Check out repository code
         uses: actions/checkout@v2
