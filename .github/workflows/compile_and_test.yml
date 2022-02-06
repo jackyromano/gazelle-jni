@@ -4,7 +4,7 @@ jobs:
   build_docker:
       runs-on: [self-hosted]
       outputs:
-          image_name: localhost:5000/gazelle-jni-ci-image
+          image_name: localhost:5000/gazelle-jni-ci-image:latest
       container:
         image: ubit-artifactory-il.intel.com:6561/bsr/docker-git:1.0
         volumes:
@@ -12,8 +12,8 @@ jobs:
       steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: docker build -t localhost:5000/gazelle-jni-ci-image  tools/build_docker
-      - run: docker push localhost:5000/gazelle-jni-ci-image  
+      - run: docker build -t localhost:5000/gazelle-jni-ci-image:latest  tools/dockers/build_docker
+      - run: docker push localhost:5000/gazelle-jni-ci-image:latest
 
   build:
     runs-on: [self-hosted]
