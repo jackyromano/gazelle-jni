@@ -12,6 +12,10 @@ jobs:
       runs-on: [self-hosted]
       outputs:
           image_name: localhost:5000/gazelle-jni-ci-image:latest
+      container:
+        image: cache-registry.caas.intel.com/cache/library/docker:20.10-git
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
       steps:
       - name: Check out repository code
         uses: actions/checkout@v2

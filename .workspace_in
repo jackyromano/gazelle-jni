@@ -16,3 +16,4 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${WORKSPACE}/components/xiphos-datasourc
 export w=$WORKSPACE
 alias b='$WORKSPACE/tools/build_gazelle_jni.sh -p'
 alias t='$WORKSPACE/scripts/jni_shell < $WORKSPACE/tests/gazelle_jni_test.scala'
+export SPARK_HOME=$WORKSPACE/spark-3.1.1-bin-hadoop2.7
