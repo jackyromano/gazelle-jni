@@ -1,8 +1,6 @@
 name: Xiphos integration CI
 on:
   pull_request:
-    types:
-      - opened
     branches:
       - 'xiphos-integration'
       - 'master'
