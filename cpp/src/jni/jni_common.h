@@ -26,6 +26,7 @@
 #include <gandiva/tree_expr_builder.h>
 #include <google/protobuf/io/coded_stream.h>
 
+#include <fstream>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -33,8 +34,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <mutex>
-#include <fstream>
 
 #include "proto/protobuf_utils.h"
 #include "proto/substrait_utils.h"
@@ -335,8 +334,7 @@ arrow::Status MakeExprVector(JNIEnv* env, jbyteArray exprs_arr,
   return arrow::Status::OK();
 }
 
-void ExportBytes(const uint8_t *bytes, size_t len)
-{
+void ExportBytes(const uint8_t* bytes, size_t len) {
   static int plan_id = 0;
   static std::mutex s_mutex;
   if (getenv("GAZELLE_JNI_PLAN") == nullptr) return;
@@ -354,7 +352,7 @@ void ExportBytes(const uint8_t *bytes, size_t len)
     perror(filename.c_str());
     return;
   }
-  fp.write((const char *)bytes, len);
+  fp.write((const char*)bytes, len);
   fp.close();
 }
 
@@ -365,7 +363,7 @@ arrow::Status ParseSubstraitPlan(
   jsize exprs_len = env->GetArrayLength(exprs_arr);
   jbyte* exprs_bytes = env->GetByteArrayElements(exprs_arr, 0);
 
-  ExportBytes(reinterpret_cast<uint8_t *>(exprs_bytes), exprs_len);
+  ExportBytes(reinterpret_cast<uint8_t*>(exprs_bytes), exprs_len);
   if (!ParseProtobuf(reinterpret_cast<uint8_t*>(exprs_bytes), exprs_len, &ws_plan)) {
     env->ReleaseByteArrayElements(exprs_arr, exprs_bytes, JNI_ABORT);
     return arrow::Status::UnknownError("Unable to parse");
