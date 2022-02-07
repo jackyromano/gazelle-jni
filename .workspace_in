@@ -1,4 +1,4 @@
-export DEV_DOCKER=gazelle-jni-$(whoami)
+export DEV_DOCKER=$(whoami)-dev
 export OLD_JAVA_HOME=$JAVA_HOME
 echo "OS: $OS"
 if [ "$OS" == "Darwin" ]; then

@@ -1,19 +1,22 @@
-name: GitHub Actions Demo
-on: [push]
+name: Xiphos integration CI
+on:
+  pull_request:
+    types:
+      - opened
+    branches:
+      - 'xiphos-integration'
+      - 'master'
+
 jobs:
   build_docker:
       runs-on: [self-hosted]
       outputs:
-          image_name: localhost:5000/gazelle-jni-ci-image
-      container:
-        image: ubit-artifactory-il.intel.com:6561/bsr/docker-git:1.0
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
+          image_name: localhost:5000/gazelle-jni-ci-image:latest
       steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: docker build -t localhost:5000/gazelle-jni-ci-image  tools/build_docker
-      - run: docker push localhost:5000/gazelle-jni-ci-image  
+      - run: docker build -t localhost:5000/gazelle-jni-ci-image:latest  tools/dockers/build_docker
+      - run: docker push localhost:5000/gazelle-jni-ci-image:latest
 
   build:
     runs-on: [self-hosted]
@@ -27,6 +30,6 @@ jobs:
         uses: actions/checkout@v2
       - uses: jfrog/setup-jfrog-cli@v2
       - run: jfrog --version
-      - run: tools/build_gazelle_jni.sh
+      - run: tools/build_gazelle_jni.sh --batch
       - run: tools/run_tests.sh
 
