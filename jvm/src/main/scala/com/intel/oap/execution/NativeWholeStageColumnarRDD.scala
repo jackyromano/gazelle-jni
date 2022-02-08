@@ -23,8 +23,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-import com.google.common.collect.Lists
-import com.intel.oap.GazellePluginConfig
+import com.intel.oap.GazelleJniConfig
 import com.intel.oap.expression.ConverterUtils
 import com.intel.oap.vectorized._
 import org.apache.arrow.vector.types.pojo.Schema
@@ -73,9 +72,8 @@ class NativeWholeStageColumnarRDD(
     jarList: Seq[String],
     dependentKernelIterators: ListBuffer[BatchIterator])
     extends RDD[ColumnarBatch](sc, Nil) {
-  val numaBindingInfo = GazellePluginConfig.getConf.numaBindingInfo
-  val loadNative = GazellePluginConfig.getConf.loadNative
-  val libName = GazellePluginConfig.getConf.nativeLibName
+  val numaBindingInfo = GazelleJniConfig.getConf.numaBindingInfo
+  val loadNative: Boolean = GazelleJniConfig.getConf.loadNative
 
   override protected def getPartitions: Array[Partition] = {
     inputPartitions.zipWithIndex.map {
@@ -102,16 +100,12 @@ class NativeWholeStageColumnarRDD(
     var outputSchema : Schema = null
     var resIter : BatchIterator = null
     if (loadNative) {
-      // TODO: Does it still need 'jarList', inputSchema, outputSchema, dependentKernelIterators
-      val transKernel = new ExpressionEvaluator(jarList.toList.asJava, libName)
-      val inBatchIter: ColumnarNativeIterator = null
-      inputSchema = ConverterUtils.toArrowSchema(inputAttributes)
+      // TODO: 'jarList' is kept for codegen
+      val transKernel = new ExpressionEvaluator(jarList.toList.asJava)
+      val inBatchIters = new java.util.ArrayList[ColumnarNativeIterator]()
       outputSchema = ConverterUtils.toArrowSchema(outputAttributes)
-      // FIXME: the 4th. and 5th. parameters are not needed for this case
-      resIter = transKernel.createNativeKernelWithIterator(
-        inputSchema, inputPartition.substraitPlan, outputSchema,
-        Lists.newArrayList(), inBatchIter,
-        dependentKernelIterators.toArray, true)
+      resIter = transKernel.createKernelWithBatchIterator(
+        inputPartition.substraitPlan, inBatchIters)
     }
     val iter = new Iterator[Any] {
       private val inputMetrics = TaskContext.get().taskMetrics().inputMetrics

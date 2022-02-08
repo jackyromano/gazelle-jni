@@ -116,7 +116,9 @@ void SubstraitParser::ParseExpression(const substrait::Expression& sexpr) {
       break;
     }
     default:
-      if (verbose) std::cout << "Expression " << sexpr.rex_type_case() << " not supported... ignored" << std::endl;
+      if (verbose)
+        std::cout << "Expression " << sexpr.rex_type_case() << " not supported... ignored"
+                  << std::endl;
       break;
   }
 }
@@ -262,7 +264,7 @@ void SubstraitParser::ParseRelRoot(const substrait::RelRoot& sroot) {
     if (snames.size() == 0) {
       std::cout << "ParseRelRoot has no names" << std::endl;
     } else {
-      for (auto const & n : snames) {
+      for (auto const& n : snames) {
         std::cout << "ParseRelRoot : " << n << std::endl;
       }
     }

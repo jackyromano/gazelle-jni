@@ -23,6 +23,7 @@ RUN apt-get install -y tig
 RUN apt-get install -y ccache
 RUN apt-get install -y htop
 RUN apt-get install -y ctags
+RUN apt-get install -y bash-completion
 
 # Enable no passwd for sudo
 COPY sudoers /etc/sudoers

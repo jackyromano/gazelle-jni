@@ -1,21 +1,21 @@
-#include <iostream>
+#include <arrow/pretty_print.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <string>
-#include <fstream>
+
 #include <exception>
-#include <vector>
+#include <fstream>
+#include <iostream>
 #include <iterator>
-#include "proto/substrait_utils.h"
+#include <string>
+#include <vector>
+
 #include "proto/protobuf_utils.h"
-#include <arrow/pretty_print.h>
+#include "proto/substrait_utils.h"
 
 using namespace std;
 
-
-vector<uint8_t> ImportPlan(const string & filename)
-{
+vector<uint8_t> ImportPlan(const string& filename) {
   ifstream ifs(filename, ios::binary);
   if (!ifs) throw runtime_error("Failed to open " + filename);
 
@@ -24,8 +24,7 @@ vector<uint8_t> ImportPlan(const string & filename)
   return data;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char* argv[]) {
   if (argc != 2) {
     printf("Usage: %s <substrait plan>\n", argv[0]);
     exit(1);
@@ -45,13 +44,12 @@ int main(int argc, char *argv[])
 
   cout << "============= RESULTS batches ==================" << endl;
   while (out_iter->HasNext()) {
-      shared_ptr<arrow::RecordBatch> record;
-      if (out_iter->Next(&record) != arrow::Status::OK()) {
-          cout << "Ooop, error" << endl;
-          break;
-      }
-      arrow::PrettyPrint(*record, 0, &cout);
-
+    shared_ptr<arrow::RecordBatch> record;
+    if (out_iter->Next(&record) != arrow::Status::OK()) {
+      cout << "Ooop, error" << endl;
+      break;
+    }
+    arrow::PrettyPrint(*record, 0, &cout);
   }
   cout << "===============================================" << endl;
   return 0;
