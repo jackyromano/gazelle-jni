@@ -17,7 +17,7 @@ jobs:
       steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: docker build -t localhost:5000/gazelle-jni-ci-image:latest  tools/dockers/build_docker
+      - run: docker build --no-cache -t localhost:5000/gazelle-jni-ci-image:latest  tools/dockers/build_docker
       - run: docker push localhost:5000/gazelle-jni-ci-image:latest
 
   build:
