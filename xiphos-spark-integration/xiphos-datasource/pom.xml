@@ -51,6 +51,29 @@
     </dependencies>
 <build>
     <plugins>
+        <!--
+    Plugin for launching the Makefile
+-->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+
+                <execution>
+                    <id>makeFile</id>
+                    <phase>compile</phase>
+                    <goals>
+                        <goal>exec</goal>
+                    </goals>
+                    <configuration>
+                        <executable>/usr/bin/make</executable>
+                        <workingDirectory>${project.basedir}/cpp</workingDirectory>
+                    </configuration>
+                </execution>
+
+            </executions>
+        </plugin>
+
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
