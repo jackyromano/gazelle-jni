@@ -27,7 +27,7 @@ object XiphosJNI {
     instance
   }
   def init: Boolean = {
-    get.init("just a test")
+    get.init()
   }
   def getSchema(tableName : String) : StructType = {
     var st = new StructType

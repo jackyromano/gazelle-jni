@@ -4,11 +4,14 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project (xiphosJNI)
 
-
 set (JNI_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jni)
 set (JNI_HEADER ${JNI_HEADER_DIR}/com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp.h)
 set (JNI_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../src/main/java/com/intel/dbio/sources/datasourcev2/xiphosv2/XiphosJniImp.java)
 set (TARGET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../target)
+
+find_package(Arrow CONFIG REQUIRED)
+message(STATUS "Using arrow ${ARROW_VERSION}")
+set(ARROW_LIBRARIES arrow arrow_flight)
 
 find_package(JNI)
 
@@ -30,6 +33,8 @@ set (SRC
     ${JNI_HEADER}
     )
 
+set(NB_LIBRARIES neuroblade-daxl ${ARROW_LIBRARIES})
+
 add_library(${PROJECT_NAME} SHARED ${SRC} )
 target_include_directories(${PROJECT_NAME} PUBLIC 
     ${JNI_HEADER_DIR} 
@@ -38,9 +43,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 #target_link_libraries(${PROJECT_NAME} ${JNI_LIBRARIES})
 if (APPLE) 
     message("Using APPLE libraries")
-    target_link_libraries(${PROJECT_NAME} /usr/local/Cellar/openjdk@8/1.8.0+312/libexec/openjdk.jdk/Contents/Home/jre/lib/server/libjvm.dylib)
+    target_link_libraries(${PROJECT_NAME} ${NB_LIBRARIES} /usr/local/Cellar/openjdk@8/1.8.0+312/libexec/openjdk.jdk/Contents/Home/jre/lib/server/libjvm.dylib)
 else()
-    target_link_libraries(${PROJECT_NAME} ${JNI_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${NB_LIBRARIES} ${JNI_LIBRARIES})
 endif()
 
 set_property(TARGET ${PROJECT_NAME}  PROPERTY CXX_STANDARD 17)
