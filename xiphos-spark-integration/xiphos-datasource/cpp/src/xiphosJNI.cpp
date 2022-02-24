@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <daxl/Daxl.h>
 
 using namespace std;
 
@@ -35,10 +36,14 @@ jint throwException(JNIEnv *env, const string & exName, const string & message)
 
 
 JNIEXPORT jboolean JNICALL 
-    Java_com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp_init (JNIEnv *env, jobject obj, jstring initString)
+    Java_com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp_init (JNIEnv *env, jobject obj)
 {
-    std::cout << "Hello from JNI\n";
-    std::cout << "Init string: " << env->GetStringUTFChars(initString, nullptr)  << std::endl;
+    std::cout << "JNI init\n";
+
+    daxl::Daxl::getInstance()->init();
+    if (verbose) {
+        std::cout << "DAXL initialized\n";
+    }
     return true;
 }
 

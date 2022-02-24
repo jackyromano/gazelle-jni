@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 
 class DefaultSource extends TableProvider {
   var verbose = false;
-  XiphosJNI.get.init("hello there")
+  XiphosJNI.get.init
 
   override def inferSchema(caseInsensitiveStringMap: CaseInsensitiveStringMap): StructType = {
     getTable(null,Array.empty[Transform],caseInsensitiveStringMap.asCaseSensitiveMap()).schema()

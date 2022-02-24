@@ -53,8 +53,27 @@
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
-        <pluginManagement>
+        <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>makeFile</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>/usr/bin/make</executable>
+                                <workingDirectory>${project.basedir}/xiphos-tools</workingDirectory>
+                            </configuration>
+                        </execution>
 
+                    </executions>
+                </plugin>
+        </plugins>
+        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

@@ -9,7 +9,7 @@ class JNITests {
 
   @Test
   def JNIInit = {
-    assertTrue(XiphosJNI.get.init("hello there"))
+    assertTrue(XiphosJNI.get.init())
   }
   @Test
   def JNIGetTableDesc = {
