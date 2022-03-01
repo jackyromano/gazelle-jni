@@ -29,6 +29,7 @@ add_custom_command(
 )
 
 set (SRC
+    src/xiphosUtils.cpp
     src/xiphosJNI.cpp
     ${JNI_HEADER}
     )
@@ -45,7 +46,7 @@ if (APPLE)
     message("Using APPLE libraries")
     target_link_libraries(${PROJECT_NAME} ${NB_LIBRARIES} /usr/local/Cellar/openjdk@8/1.8.0+312/libexec/openjdk.jdk/Contents/Home/jre/lib/server/libjvm.dylib)
 else()
-    target_link_libraries(${PROJECT_NAME} ${NB_LIBRARIES} ${JNI_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${NB_LIBRARIES} ${JNI_LIBRARIES} pthread)
 endif()
 
 set_property(TARGET ${PROJECT_NAME}  PROPERTY CXX_STANDARD 17)

@@ -18,16 +18,12 @@ public class XiphosJniImp {
 
     /**
      * Initialize Xiphos appliance
-     * @param str
      * @return success status
      */
     public native boolean  init();
 
     /**
      * Get schema description string. The string is space delimited pairs of name:type:isNullable where type is one of
-     * "s" : string
-     * "i" : Integer
-     * "d" : data
      * @param tableName
      * @return schema description string
      */
