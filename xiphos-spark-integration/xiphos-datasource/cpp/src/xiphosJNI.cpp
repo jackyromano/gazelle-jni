@@ -63,7 +63,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_dbio_sources_datasourcev2_xiphosv2_Xiph
         retval += XiphosUtils::serialize_column("second_value", "integer", true);
 
     } else {
-         DiskTable diskTable = XiphosUtils :: findTable(tableName);
+         DiskTable diskTable = XiphosUtils::findTable(tableName);
 
             for (uint i = 0; i < diskTable.getColumns().size(); i++)
             {

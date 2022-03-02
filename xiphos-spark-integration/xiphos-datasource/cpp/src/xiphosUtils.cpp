@@ -14,14 +14,8 @@ const std::string SPARK_DECIMAL_TYPE = "decimal";
 
 class XiphosUtils {
 public:
-   /* DiskTable findTable(std::string tableName);
-    std::string serialize_column(daxl::Column column);
-    std::string serialize_column(std::string col_name, std::string col_type, bool is_nullable);
-    std::string bool_to_str(bool val);
-*/
 
-        static DiskTable findTable(std::string tableName)
-         {
+        static DiskTable findTable(std::string tableName){
              TableManager *tableManager = TableManager::getInstance();
 
                 daxl::Status status;
@@ -30,8 +24,7 @@ public:
 
                 status = tableManager->findTable(tableName, &table);
 
-                if (status.getErrorCode() == TABLE_NOT_FOUND)
-                {
+                if (status.getErrorCode() == TABLE_NOT_FOUND){
                     throw std::runtime_error("table " + tableName + " not found");
                 }
                 return table;
@@ -57,8 +50,7 @@ public:
             return "{\"name\":\"" + col_name + "\", \"type\":\""+col_type+"\", \"nullable\": " + bool_to_str(is_nullable) + " ,\"metadata\":{}}";
          }
 
-        static std::string bool_to_str(bool val)
-        {
+        static std::string bool_to_str(bool val){
             return val? "true" : "false";
         }
 
