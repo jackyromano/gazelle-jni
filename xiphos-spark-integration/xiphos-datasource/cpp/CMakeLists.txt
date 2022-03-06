@@ -9,8 +9,11 @@ set (JNI_HEADER ${JNI_HEADER_DIR}/com_intel_dbio_sources_datasourcev2_xiphosv2_X
 set (JNI_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../src/main/java/com/intel/dbio/sources/datasourcev2/xiphosv2/XiphosJniImp.java)
 set (TARGET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../target)
 
-find_package(Arrow CONFIG REQUIRED)
-message(STATUS "Using arrow ${ARROW_VERSION}")
+#find_package(Arrow CONFIG REQUIRED)
+#message(STATUS "Using arrow ${ARROW_VERSION}")
+
+include_directories(/usr/neuroblade/nb-daxl/include)
+link_directories(/usr/neuroblade/nb-arrow/lib /usr/neuroblade/nb-daxl/lib)
 set(ARROW_LIBRARIES arrow arrow_flight)
 
 find_package(JNI)

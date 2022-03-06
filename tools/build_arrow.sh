@@ -94,7 +94,7 @@ if [ $BUILD_ARROW == "ON" ]; then
             -DCMAKE_INSTALL_PREFIX=${ARROW_INSTALL_DIR} \
             -DCMAKE_INSTALL_LIBDIR=lib
 
-    make -j$NPROC
+    make  -j$NPROC 
     make install
 
     cd java        

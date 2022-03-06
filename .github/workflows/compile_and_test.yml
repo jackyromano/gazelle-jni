@@ -7,7 +7,9 @@ on:
 
 jobs:
   build_docker:
-      runs-on: [self-hosted]
+      runs-on: [self-hosted, docker]
+      env:
+          ARTIFACTORY_SERVER: localhost:5000
       outputs:
           image_name: localhost:5000/gazelle-jni-ci-image:latest
       container:
@@ -17,14 +19,18 @@ jobs:
       steps:
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: docker build -t localhost:5000/gazelle-jni-ci-image:latest  tools/dockers/build_docker
-      - run: docker push localhost:5000/gazelle-jni-ci-image:latest
+      #- run: echo ${{secrets.ARTIFACTORY_REGISTRY_TOKEN}} | docker login --username query_dev --password-stdin $ARTIFACTORY_SERVER
+      - run: docker build -t ${ARTIFACTORY_SERVER}/gazelle-jni-ci-image:latest  tools/dockers/build_docker
+      - run: docker push ${ARTIFACTORY_SERVER}/gazelle-jni-ci-image:latest
 
   build:
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, docker]
     needs: build_docker
     container: 
       image: ${{needs.build_docker.outputs.image_name}}
+      credentials:
+          username: query_dev
+          password: ${{secrets.ARTIFACTORY_REGISTRY_TOKEN}}
     env:
       WORKSPACE : ${{github.workspace}}
     steps:
@@ -33,5 +39,24 @@ jobs:
       - uses: jfrog/setup-jfrog-cli@v2
       - run: jfrog --version
       - run: tools/build_gazelle_jni.sh --batch
+      - name: Archive images
+        uses: actions/upload-artifact@v3
+        with:
+          name: "xiphos-artifacts"
+          path: artifacts
+  test:
+    runs-on: [self-hosted, xiphos-hw]
+    needs: build
+    env:
+      WORKSPACE : ${{github.workspace}}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: ls -l 
+      - uses: actions/download-artifact@v3
+        name: Download artifcts
+        with:
+          name: "xiphos-artifacts"
+          path: artifacts
+      - run: ls -l artifacts
       - run: tools/run_tests.sh
-
