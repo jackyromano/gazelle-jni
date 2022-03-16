@@ -3,8 +3,12 @@
 #include <string>
 #include <algorithm>
 #include <daxl/Daxl.h>
+#include "daxl/DiskTable.h"
+#include  "xiphosUtils.cpp"
 
 using namespace std;
+using namespace daxl;
+
 
 static bool verbose = false;
 
@@ -35,8 +39,7 @@ jint throwException(JNIEnv *env, const string & exName, const string & message)
 }
 
 
-JNIEXPORT jboolean JNICALL 
-    Java_com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp_init (JNIEnv *env, jobject obj)
+JNIEXPORT jboolean JNICALL Java_com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp_init(JNIEnv *, jobject)
 {
     std::cout << "JNI init\n";
 
@@ -47,24 +50,33 @@ JNIEXPORT jboolean JNICALL
     return true;
 }
 
-JNIEXPORT jstring JNICALL 
-    Java_com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp_getSchemaDesc (JNIEnv *env, jobject obj, jstring _tableName)
+JNIEXPORT jstring JNICALL Java_com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp_getSchemaDesc(JNIEnv *env, jobject obj, jstring _tableName)
 {
     string tableName = string(env->GetStringUTFChars(_tableName, nullptr));
     if (verbose) cout << "getSchemaDesc for " << tableName << endl;
-
-    string retval = "";
-
+    string retval = "{\"type\":\"struct\",\"fields\":[";
     if (tableName == string("test_table_1")) {
-        retval += string("id:i:false value:s:false");
+        retval += XiphosUtils::serialize_column("id", "integer");
     } else if (tableName == string("test_table_2")) {
-        retval += string("id:i:false") + " ";
-        retval += string("first_value:s:false") + " ";
-        retval += string("second_value:i:true") + " ";
+        retval += XiphosUtils::serialize_column("id", "integer", false);
+        retval += XiphosUtils::serialize_column("first_value", "string", false);
+        retval += XiphosUtils::serialize_column("second_value", "integer", true);
+
     } else {
-        // TODO - get the data from Xiphos
-        // crash for now
-        throwException(env, "java.io.fileNoFoundException", "Xiphos is not supported for now"); 
+         DiskTable diskTable = XiphosUtils::findTable(tableName);
+
+            for (uint i = 0; i < diskTable.getColumns().size(); i++)
+            {
+                 retval += XiphosUtils::serialize_column(diskTable.getColumns().at(i));
+                 if(i != diskTable.getColumns().size() -1)
+                 {
+                    retval += ",";
+                 }
+            }
+
     }
+    retval += "]}";
     return env->NewStringUTF(retval.c_str());
 }
+
+

@@ -1,21 +1,14 @@
 package com.intel.dbio.sources.datasourcev2.xiphosv2
 
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import org.scalatest.Ignore
+import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
+import org.junit.{Ignore, Test}
 
-@Ignore
 class JNITests {
-
-  @Test
-  def JNIInit = {
-    assertTrue(XiphosJNI.get.init())
-  }
+  @Ignore
   @Test
   def JNIGetTableDesc = {
-    val tables : Array[String] = Array("test_table_1", "test_table_2")
-    tables.foreach( t => {
-      println(XiphosJNI.get.getSchemaDesc(t))
-    })
+    val schema =XiphosJNI.getSchema("lineitem_quantity")
+    assertNotNull(schema)
+    assertEquals(16,  schema.fields.length)
   }
 }
