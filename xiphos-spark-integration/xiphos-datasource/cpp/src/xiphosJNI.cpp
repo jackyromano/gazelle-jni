@@ -43,7 +43,13 @@ JNIEXPORT jboolean JNICALL Java_com_intel_dbio_sources_datasourcev2_xiphosv2_Xip
 {
     std::cout << "JNI init\n";
 
-    daxl::Daxl::getInstance()->init();
+    if (getenv("DAXL_CONFIG_FILE") == nullptr) {
+        std::cerr << "ERROR: DAXL_CONFIG_FILE env variable is not defined !!" << std::endl;
+        return false;
+    }
+    std::string configPath(getenv("DAXL_CONFIG_FILE"));
+
+    daxl::Daxl::getInstance()->init(configPath, daxl::Role::WORKER);
     if (verbose) {
         std::cout << "DAXL initialized\n";
     }
