@@ -181,10 +181,19 @@ class GazelleJniConfig(conf: SQLConf) extends Logging {
   // and the cached buffers will be spilled when reach maximum memory.
   val columnarShufflePreferSpill: Boolean =
     conf.getConfString("spark.oap.sql.columnar.shuffle.preferSpill", "true").toBoolean
-  
+
+  val columnarShuffleWriteSchema: Boolean =
+    conf.getConfString("spark.oap.sql.columnar.shuffle.writeSchema", "false").toBoolean
+
   // The supported customized compression codec is lz4 and fastpfor.
   val columnarShuffleUseCustomizedCompressionCodec: String =
     conf.getConfString("spark.oap.sql.columnar.shuffle.customizedCompression.codec", "lz4")
+
+  val columnarShuffleBatchCompressThreshold: Int =
+    conf.getConfString("spark.oap.sql.columnar.shuffle.batchCompressThreshold", "100").toInt
+
+  val shuffleSplitDefaultSize: Int =
+    conf.getConfString("spark.oap.sql.columnar.shuffleSplitDefaultSize", "8192").toInt
 
   val numaBindingInfo: GazelleNumaBindingInfo = {
     val enableNumaBinding: Boolean =
@@ -203,6 +212,18 @@ class GazelleJniConfig(conf: SQLConf) extends Logging {
 
     }
   }
+
+  val clickhouseMergeTreeTablePath: String =
+    conf.getConfString("spark.oap.sql.columnar.ch.mergetree.table.path", "")
+
+  val clickhouseMergeTreeEnabled: Boolean =
+    conf.getConfString("spark.oap.sql.columnar.ch.mergetree.enabled", "false").toBoolean
+
+  val clickhouseMergeTreeDatabase: String =
+    conf.getConfString("spark.oap.sql.columnar.ch.mergetree.database", "default")
+
+  val clickhouseMergeTreeTable: String =
+    conf.getConfString("spark.oap.sql.columnar.ch.mergetree.table", "test")
 }
 
 object GazelleJniConfig {

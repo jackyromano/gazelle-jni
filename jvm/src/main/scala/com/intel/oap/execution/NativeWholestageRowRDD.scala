@@ -27,13 +27,12 @@ import org.apache.spark.{Partition, SparkContext, SparkException, TaskContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.UnsafeRow
-import org.apache.spark.sql.connector.read.{InputPartition, PartitionReaderFactory}
+import org.apache.spark.sql.connector.read.InputPartition
 import org.apache.spark.util._
 
 class NativeWholestageRowRDD(
     sc: SparkContext,
     @transient private val inputPartitions: Seq[InputPartition],
-    partitionReaderFactory: PartitionReaderFactory,
     columnarReads: Boolean)
     extends RDD[InternalRow](sc, Nil) {
   val numaBindingInfo = GazelleJniConfig.getConf.numaBindingInfo
@@ -64,7 +63,9 @@ class NativeWholestageRowRDD(
     if (loadNative) {
       val transKernel = new ExpressionEvaluator()
       val inBatchIters = new java.util.ArrayList[ColumnarNativeIterator]()
+      var startTime = System.nanoTime()
       resIter = transKernel.createKernelWithRowIterator(inputPartition.substraitPlan, inBatchIters)
+      logWarning(s"===========create ${System.nanoTime() - startTime}")
     }
 
     val iter = new Iterator[InternalRow] with AutoCloseable {
@@ -84,11 +85,11 @@ class NativeWholestageRowRDD(
       private def nextIterator(): Boolean = {
         var startTime = System.nanoTime()
         if (resIter.hasNext) {
-          logWarning(s"===========${totalBatch} ${System.nanoTime() - startTime}")
+          logWarning(s"===========hasNext ${totalBatch} ${System.nanoTime() - startTime}")
           startTime = System.nanoTime()
           val sparkRowInfo = resIter.next()
           totalBatch += 1
-          logWarning(s"===========${totalBatch} ${System.nanoTime() - startTime}")
+          logWarning(s"===========next ${totalBatch} ${System.nanoTime() - startTime}")
           val result = if (sparkRowInfo.offsets != null && sparkRowInfo.offsets.length > 0) {
             val numRows = sparkRowInfo.offsets.length
             val numFields = sparkRowInfo.fieldsNum
@@ -130,8 +131,13 @@ class NativeWholestageRowRDD(
       }
 
       override def close(): Unit = {
+        var startTime = System.nanoTime()
         resIter.close()
+        logWarning(s"===========close ${System.nanoTime() - startTime}")
       }
+    }
+    context.addTaskCompletionListener[Unit] { _ =>
+      iter.close()
     }
     iter
   }
