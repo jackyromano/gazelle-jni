@@ -27,7 +27,7 @@ endif()
 
 add_custom_command(
     OUTPUT ${JNI_HEADER}
-    COMMAND javac -h ${JNI_HEADER_DIR} -d /tmp ${JNI_SOURCE}
+    COMMAND mkdir -p /tmp/header_gen && javac -h ${JNI_HEADER_DIR} -d /tmp/header_gen ${JNI_SOURCE} && rm -rf /tmp/header_gen
     DEPENDS ${JNI_SOURCE}
 )
 
