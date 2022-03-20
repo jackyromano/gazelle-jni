@@ -12,7 +12,7 @@ set (TARGET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../target)
 #find_package(Arrow CONFIG REQUIRED)
 #message(STATUS "Using arrow ${ARROW_VERSION}")
 
-include_directories(/usr/neuroblade/nb-daxl/include)
+include_directories(/usr/neuroblade/nb-daxl/include /usr/neuroblade/nb-arrow/include)
 link_directories(/usr/neuroblade/nb-arrow/lib /usr/neuroblade/nb-daxl/lib)
 set(ARROW_LIBRARIES arrow arrow_flight)
 
