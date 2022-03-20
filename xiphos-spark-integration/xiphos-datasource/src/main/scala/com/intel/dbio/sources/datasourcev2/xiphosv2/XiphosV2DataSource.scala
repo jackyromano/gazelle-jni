@@ -16,7 +16,6 @@ import scala.collection.JavaConverters._
 
 class DefaultSource extends TableProvider {
   var verbose = false;
-  XiphosJNI.get.init
 
   override def inferSchema(caseInsensitiveStringMap: CaseInsensitiveStringMap): StructType = {
     getTable(null,Array.empty[Transform],caseInsensitiveStringMap.asCaseSensitiveMap()).schema()
@@ -40,7 +39,9 @@ class XiphosV2BatchTable(val _properties : util.Map[String, String]) extends Tab
   println("tableName:" + tableName)
   override def name(): String = this.getClass.toString + "_" + tableName
 
-  override def schema(): StructType = XiphosJNI.getSchema(tableName)
+  override def schema(): StructType = {
+    XiphosJNI.getSchema(tableName)
+  }
 
   override def capabilities(): util.Set[TableCapability] = Set(TableCapability.BATCH_READ).asJava
 

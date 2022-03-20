@@ -34,5 +34,16 @@ done
 
 
 pushd $root
-mvn $DO_CLEAN package $BATCH_MODE -P full-scala-compiler -Dbuild_arrow=${BUILD_ARROW} -Dbuild_cpp=ON -Dclean_cpp=${CLEAN_CPP} -DskipTests -Dcheckstyle.skip
+if [ "$DO_CLEAN" == "clean" ]; then
+    mvn clean $BATCH_MODE -P full-scala-compiler -Dbuild_arrow=${BUILD_ARROW} -Dbuild_cpp=ON -Dclean_cpp=${CLEAN_CPP} -DskipTests -Dcheckstyle.skip
+fi
+
+mvn package $BATCH_MODE -P full-scala-compiler -Dbuild_arrow=${BUILD_ARROW} -Dbuild_cpp=ON -Dclean_cpp=${CLEAN_CPP} -DskipTests -Dcheckstyle.skip
+
+artifacts_dir=artifacts
+mkdir -p $artifacts_dir
+cp jvm/target/*.jar $artifacts_dir
+cp cpp/build/src/plan_tester/plan_tester $artifacts_dir
+cp -r tests $artifacts_dir
+cp xiphos-spark-integration/resources/config.yaml $artifacts_dir
 popd 

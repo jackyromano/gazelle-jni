@@ -19,45 +19,10 @@ package com.intel.dbio.sources.datasourcev2.xiphosv2
 import org.apache.spark.sql.types.{DataType, DateType, IntegerType, StringType, StructType}
 
 object XiphosJNI {
-  private var instance : XiphosJniImp = null
-  def get : XiphosJniImp = {
-    if (instance == null) {
-      instance = new XiphosJniImp
-    }
-    instance
-  }
-  def init: Boolean = {
-    get.init()
-  }
+  private val instance : XiphosJniImp = new XiphosJniImp
+  instance.init()
   def getSchema(tableName : String) : StructType = {
-    var st = new StructType
-    val desc = get.getSchemaDesc(tableName)
-    desc.split(" +").foreach(f => {
-      val field_desc = f.split(":")
-      st = st.add(
-        field_desc(0),
-        getDataType(field_desc(1)),
-        isNullable(field_desc(2)))
-    })
-    //scalastyle:off
-    println(st)
-    // scalastyle:on
-    st
-  }
-  def getDataType(s : String): DataType = {
-    s match {
-      case "s" => StringType
-      case "i" => IntegerType
-      case "d" => DateType
-      case _ => {
-        throw new RuntimeException("Unsupported data type")
-      }
-    }
-  }
-  def isNullable(s : String) : Boolean = {
-    s match {
-      case "false" => false
-      case _ => true
-    }
+    val desc = instance.getSchemaDesc(tableName)
+    DataType.fromJson(desc).asInstanceOf[StructType]
   }
 }
