@@ -25,7 +25,7 @@ import com.intel.oap.GazelleJniConfig
 import com.intel.oap.expression._
 import com.intel.oap.substrait.extensions.{MappingBuilder, MappingNode}
 import com.intel.oap.substrait.plan.{PlanBuilder, PlanNode}
-import com.intel.oap.substrait.rel.{LocalFilesBuilder, RelNode}
+import com.intel.oap.substrait.rel.{ExtensionTableBuilder, LocalFilesBuilder, RelNode}
 import com.intel.oap.substrait.SubstraitContext
 import com.intel.oap.vectorized._
 import org.apache.arrow.gandiva.expression._
@@ -87,6 +87,11 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
   val numaBindingInfo = GazelleJniConfig.getConf.numaBindingInfo
   val enableColumnarSortMergeJoinLazyRead: Boolean =
     GazelleJniConfig.getConf.enableColumnarSortMergeJoinLazyRead
+
+  val clickhouseMergeTreeTablePath = GazelleJniConfig.getConf.clickhouseMergeTreeTablePath
+  val clickhouseMergeTreeEnabled = GazelleJniConfig.getConf.clickhouseMergeTreeEnabled
+  val clickhouseMergeTreeDatabase = GazelleJniConfig.getConf.clickhouseMergeTreeDatabase
+  val clickhouseMergeTreeTable = GazelleJniConfig.getConf.clickhouseMergeTreeTable
 
   override lazy val metrics = Map(
     "numOutputRows" -> SQLMetrics.createMetric(sparkContext, "number of output rows"),
@@ -274,16 +279,22 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
       throw new UnsupportedOperationException
   }
 
-  def checkBatchScanExecTransformerChild(): Option[BatchScanExecTransformer] = {
+  def checkBatchScanExecTransformerChild(): Option[BasicScanExecTransformer] = {
     var current_op = child
     while (current_op.isInstanceOf[TransformSupport] &&
-      !current_op.isInstanceOf[BatchScanExecTransformer] &&
+      !current_op.isInstanceOf[BasicScanExecTransformer] &&
       current_op.asInstanceOf[TransformSupport].getChild != null) {
       current_op = current_op.asInstanceOf[TransformSupport].getChild
     }
     if (current_op != null &&
-      current_op.isInstanceOf[BatchScanExecTransformer]) {
-      Some(current_op.asInstanceOf[BatchScanExecTransformer])
+      current_op.isInstanceOf[BasicScanExecTransformer]) {
+      current_op match {
+        case op: BatchScanExecTransformer =>
+          op.partitions
+          Some(current_op.asInstanceOf[BatchScanExecTransformer])
+        case op: FileSourceScanExecTransformer =>
+          Some(current_op.asInstanceOf[FileSourceScanExecTransformer])
+      }
     } else {
       None
     }
@@ -296,30 +307,37 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
     // check if BatchScan exists
     val current_op = checkBatchScanExecTransformerChild()
     if (current_op.isDefined) {
-      // If containing batchscan, a new RDD is created.
-      val batchScan = current_op.get
+      // If containing scan exec transformer, a new RDD is created.
+      val fileScan = current_op.get
       val wsCxt = doWholestageTransform()
 
       val startTime = System.nanoTime()
-      val substraitPlanPartition = batchScan.partitions.map {
+      val substraitPlanPartition = fileScan.getPartitions.map {
         case FilePartition(index, files) =>
-          val paths = new java.util.ArrayList[String]()
-          val starts = new java.util.ArrayList[java.lang.Long]()
-          val lengths = new java.util.ArrayList[java.lang.Long]()
-          files.foreach { f =>
-            paths.add(f.filePath)
-            starts.add(new java.lang.Long(f.start))
-            lengths.add(new java.lang.Long(f.length))
+          val substraitPlan = if (clickhouseMergeTreeEnabled) {
+            val extensionTableNode = ExtensionTableBuilder.makeExtensionTable(index,
+              clickhouseMergeTreeDatabase, clickhouseMergeTreeTable, clickhouseMergeTreeTablePath)
+            wsCxt.substraitContext.setExtensionTableNode(extensionTableNode)
+            wsCxt.root.toProtobuf
+          } else {
+            val paths = new java.util.ArrayList[String]()
+            val starts = new java.util.ArrayList[java.lang.Long]()
+            val lengths = new java.util.ArrayList[java.lang.Long]()
+            files.foreach { f =>
+              paths.add(f.filePath)
+              starts.add(new java.lang.Long(f.start))
+              lengths.add(new java.lang.Long(f.length))
+            }
+            val localFilesNode = LocalFilesBuilder.makeLocalFiles(index, paths, starts, lengths)
+            wsCxt.substraitContext.setLocalFilesNode(localFilesNode)
+            wsCxt.root.toProtobuf
           }
-          val localFilesNode = LocalFilesBuilder.makeLocalFiles(index, paths, starts, lengths)
-          wsCxt.substraitContext.setLocalFilesNode(localFilesNode)
-          val substraitPlan = wsCxt.root.toProtobuf
           /*
           val out = new DataOutputStream(new FileOutputStream("/tmp/SubStraitTest-Q6.dat",
                       false));
           out.write(substraitPlan.toByteArray());
           out.flush();
-          */
+           */
           // logWarning(s"The substrait plan for partition ${index}:\n${substraitPlan.toString}")
           NativeFilePartition(index, files, substraitPlan.toByteArray)
         case p => p
@@ -327,8 +345,7 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
       logWarning(
         s"Generated substrait plan tooks: ${(System.nanoTime() - startTime) / 1000000} ms")
 
-      val wsRDD = new NativeWholestageRowRDD(sparkContext, substraitPlanPartition,
-        batchScan.readerFactory, false)
+      val wsRDD = new NativeWholestageRowRDD(sparkContext, substraitPlanPartition, false)
       wsRDD
     } else {
       sparkContext.emptyRDD
@@ -357,7 +374,7 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
     // check if BatchScan exists
     val current_op = checkBatchScanExecTransformerChild()
     if (current_op.isDefined) {
-      // If containing batchscan, a new RDD is created.
+      // If containing scan exec transformer, a new RDD is created.
       // TODO: Remove ?
       val execTempDir = GazelleJniConfig.getTempFile
       val jarList = listJars.map(jarUrl => {
@@ -369,11 +386,11 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
           sparkConf)
         s"${execTempDir}/spark-columnar-plugin-codegen-precompile-${signature}.jar"
       })
-      val batchScan = current_op.get
+      val fileScan = current_op.get
       val wsCxt = doWholestageTransform()
 
       val startTime = System.nanoTime()
-      val substraitPlanPartition = batchScan.partitions.map {
+      val substraitPlanPartition = fileScan.getPartitions.map {
         case FilePartition(index, files) =>
           val paths = new java.util.ArrayList[String]()
           val starts = new java.util.ArrayList[java.lang.Long]()
@@ -395,8 +412,7 @@ case class WholeStageTransformerExec(child: SparkPlan)(val transformStageId: Int
       logWarning(
         s"Generated substrait plan tooks: ${(System.nanoTime() - startTime) / 1000000} ms")
 
-      val wsRDD = new NativeWholeStageColumnarRDD(sparkContext, substraitPlanPartition,
-        batchScan.readerFactory, true,
+      val wsRDD = new NativeWholeStageColumnarRDD(sparkContext, substraitPlanPartition, true,
         wsCxt.inputAttributes, wsCxt.outputAttributes, jarList, dependentKernelIterators)
       wsRDD.map{ r =>
         numOutputBatches += 1
