@@ -56,17 +56,25 @@ void printTablesInfo()
 
 int main(int argc, char *argv[]) 
 {
-    if (argc < 2) {
-        cout << "Usage: " << argv[0] << " <config-file> [table name]" << endl;
-        exit(1);
+    
+    string confFile;
+    if (getenv("DAXL_CONFIG_FILE") == nullptr) {
+        cerr << "DAXL_CONFIG_FILE is not defined..\n Please define it to point to your DAXL configuration file\n";
+    } else {
+        confFile = string(getenv("DAXL_CONFIG_FILE"));
     }
 
-    daxl::Daxl::getInstance()->init(string(argv[1]), daxl::Role::MASTER);
+    if (argc > 1 && (string(argv[1]) == "-h" || string(argv[1]) == "--help")) {
+        cout << "Usage: " << argv[0] << " [table name]" << endl;
+        return 0;
+    }
 
-    if (argc < 3) {
+    daxl::Daxl::getInstance()->init(confFile, daxl::Role::MASTER);
+
+    if (argc < 2) {
         printTablesInfo();
     } else {
-        printTableInfo(argv[2]);
+        printTableInfo(argv[1]);
     }
 
     return 0;

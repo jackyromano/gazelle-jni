@@ -19,6 +19,7 @@
 #include <iterator>
 #include <list>
 #include <stack>
+#include <string>
 
 using namespace daxl;
 using namespace daxl::dataIO;
@@ -351,13 +352,19 @@ parsePartitionsParameter(std::string strPartitions) {
 
 int main(int argc, char *argv[]) {
 
-  auto confPath = std::filesystem::current_path().string() + "/config.yaml";
-
-  Daxl::getInstance()->init(confPath, Role::DATA_IO);
-
   if (argc < 2) {
+    std::cerr << "Missing parquet file - Usage: " << argv[0] << " <parquet file or directory> [batch size]\n";
     return EXIT_FAILURE;
   }
+
+  std::string confPath;
+  if (getenv("DAXL_CONFIG_FILE") != nullptr) {
+      confPath = std::string(getenv("DAXL_CONFIG_FILE"));
+  } else {
+      std::cerr << "DAXL_CONFIG_FILE env variable is not defined..\n please define it to point to DAXL configuration file\n";
+  }
+
+  Daxl::getInstance()->init(confPath, Role::DATA_IO);
 
   int batch_size = DEFAULT_CSV_BATCH_SIZE;
   if (argc > 2) {

@@ -27,6 +27,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ctags
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libboost-dev-all 
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libparquet-dev
 
 RUN echo "installating NB dependencies"
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null

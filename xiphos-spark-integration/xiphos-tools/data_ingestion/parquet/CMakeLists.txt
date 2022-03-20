@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.4)
 
 project(
-    neuroblade-daxl-samples
+    xiphos-parquet-loader
     VERSION 0.0.1
     DESCRIPTION "neuroblade daxl samples")
 
@@ -32,5 +32,5 @@ file(GLOB_RECURSE source_files *.cpp)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable(etl_parquet_dir etlParquetDir.cpp)
-target_link_libraries(etl_parquet_dir PUBLIC Boost::date_time parquet arrow_shared  ${DAXL_LIBRARIES} )
+add_executable(xiphos-parquet-loader xiphos-parquet-loader.cpp)
+target_link_libraries(xiphos-parquet-loader PUBLIC Boost::date_time parquet arrow_shared  ${DAXL_LIBRARIES} )
