@@ -10,8 +10,8 @@
 #include <string>
 #include <vector>
 
-#include "proto/protobuf_utils.h"
-#include "proto/substrait_utils.h"
+#include "compute/protobuf_utils.h"
+#include "compute/substrait_utils.h"
 
 using namespace std;
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     cout << "Failed to parse plan\n";
     exit(1);
   }
-  auto parser = std::make_shared<SubstraitParser>();
+  auto parser = std::make_shared<gazellejni::compute::SubstraitParser>();
   parser->ParsePlan(ws_plan);
 
   shared_ptr<ResultIterator<arrow::RecordBatch>> out_iter = parser->getResIter();
