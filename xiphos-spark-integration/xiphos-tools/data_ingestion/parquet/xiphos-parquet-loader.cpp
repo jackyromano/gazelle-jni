@@ -149,17 +149,17 @@ void insert_data_into_table(
   int row_group_num = reader->get()->num_row_groups();
 
   for (int group_index = 0; group_index < row_group_num; group_index++) {
-    std::shared_ptr<arrow::Table> table;
+    std::shared_ptr<arrow::Table> arrow_table;
 
     //  Fill the table with data from a single row group:
-    arrow::Status status;
-    status = reader->get()->ReadRowGroup(group_index, &table);
+    arrow::Status status = reader->get()->ReadRowGroup(group_index, &arrow_table);
 
     if (!status.ok()) {
+      std::cout << "Status: " << status << std::endl;
       throw std::runtime_error("falied to read parquet file ");
     }
 
-    arrow::TableBatchReader tableBatchReader = arrow::TableBatchReader(*table);
+    arrow::TableBatchReader tableBatchReader = arrow::TableBatchReader(*arrow_table);
     tableBatchReader.set_chunksize(batch_size);
     bool hasNextBatch;
     hasNextBatch = true;
@@ -268,7 +268,7 @@ void importSingleFileWithPartitions(
   std::list<
       std::tuple<std::string, std::shared_ptr<arrow::DataType>, std::string>>
       partitionsWithValue;
-  std::string table_name = filePath.filename();
+  std::string table_name = filePath.filename().stem();
   if (!partitions.empty()) {
     table_name =
         createPartitionValues(filePath, partitions, partitionsWithValue);
