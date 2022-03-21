@@ -19,7 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y git
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y cmake
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libssl-dev libcurl4 libcurl4-openssl-dev zlib1g-dev zlib1g curl
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libboost-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libboost-all-dev
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tig
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ccache
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y htop
@@ -27,7 +27,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ctags
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libboost-dev-all 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libparquet-dev
 
 RUN echo "installating NB dependencies"
