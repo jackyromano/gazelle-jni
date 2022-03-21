@@ -4,11 +4,11 @@ import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
 import org.junit.{Ignore, Test}
 
 class JNITests {
-  @Ignore
+ /* @Ignore
   @Test
   def JNIGetTableDesc = {
     val schema =XiphosJNI.getSchema("lineitem_quantity")
     assertNotNull(schema)
     assertEquals(16,  schema.fields.length)
   }
-}
+*/}
