@@ -158,7 +158,7 @@
                         <runpath>project.build.outputDirectory</runpath>
                         <!-- Comma separated list of JUnit test class names to execute -->
                         <environmentVariables>
-                            <DAXL_CONFIG_FILE>/usr/neuroblade/nb-daxl/config/config.yaml</DAXL_CONFIG_FILE>
+                            <DAXL_CONFIG_FILE>${project.basedir}/resources/config.yaml</DAXL_CONFIG_FILE>
                         </environmentVariables>
                     </configuration>
                     <executions>
