@@ -27,6 +27,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ctags
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+RUN wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+RUN DEBIAN_FRONTEND=noninteractive apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+RUN DEBIAN_FRONTEND=noninteractive apt update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libparquet-dev
 
 RUN echo "installating NB dependencies"
