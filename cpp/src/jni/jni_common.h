@@ -37,6 +37,9 @@
 
 #include "compute/protobuf_utils.h"
 #include "compute/substrait_utils.h"
+#include "compute/xiphos_parser.h"
+
+static bool g_use_xiphos = true;
 
 static jclass io_exception_class;
 static jclass runtime_exception_class;
@@ -379,7 +382,12 @@ arrow::Status ParseSubstraitPlan(
     env->ReleaseByteArrayElements(exprs_arr, exprs_bytes, JNI_ABORT);
     return arrow::Status::UnknownError("Unable to parse");
   }
+
+#ifdef DONT_USE_XIPHOS
   auto parser = std::make_shared<gazellejni::compute::SubstraitParser>();
+#else
+  auto parser = std::make_shared<gazellejni::compute::XiphosParser>();
+#endif
   parser->ParsePlan(ws_plan);
   *out_iter = parser->getResIter();
   return arrow::Status::OK();
