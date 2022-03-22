@@ -1,5 +1,7 @@
 #include "xiphos_parser.h"
 
+static bool verbose = true;
+
 gazellejni::compute::XiphosParser::XiphosParser()
 {
 }
@@ -10,6 +12,7 @@ gazellejni::compute::XiphosParser::~XiphosParser()
 
 void gazellejni::compute::XiphosParser::ParsePlan(const substrait::Plan &splan)
 {
+#if 0
   for (auto& sextension : splan.extensions()) {
     if (!sextension.has_extension_function()) {
       continue;
@@ -28,6 +31,7 @@ void gazellejni::compute::XiphosParser::ParsePlan(const substrait::Plan &splan)
       ParseRel(srel.rel());
     }
   }
+#endif
 }
 
 std::shared_ptr<ResultIterator<arrow::RecordBatch>> gazellejni::compute::XiphosParser::getResIter()

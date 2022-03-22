@@ -15,14 +15,16 @@ fi
 
 version="1.2.0-snapshot"
 gazelle_jni_jar=${GAZELLE_JNI_HOME}/jvm/target/gazelle-jni-jvm-${version}-jar-with-dependencies.jar
+#datasource_jar=${GAZELLE_JNI_HOME}/xiphos-spark-integration/xiphos-datasource/target/xiphos-datasource-1.2.0-snapshot-jar-with-dependencies.jar       
+datasource_jar=${GAZELLE_JNI_HOME}/xiphos-spark-integration/xiphos-datasource/target/xiphos-datasource-1.2.0-snapshot.jar       
 
 
 ${SPARK_HOME}/bin/spark-shell \
         --verbose \
         --master local \
         --driver-memory 10G \
-        --conf spark.driver.extraClassPath=${gazelle_jni_jar} \
-        --conf spark.executor.extraClassPath=${gazelle_jni_jar} \
+        --conf spark.driver.extraClassPath=${gazelle_jni_jar}:${datasource_jar} \
+        --conf spark.executor.extraClassPath=${gazelle_jni_jar}:${datasource_jar} \
         --conf spark.driver.cores=1 \
         --conf spark.executor.instances=12 \
         --conf spark.executor.cores=6 \
@@ -33,7 +35,7 @@ ${SPARK_HOME}/bin/spark-shell \
         --conf spark.sql.shuffle.partitions=72 \
         --conf spark.plugins=com.intel.oap.GazellePlugin \
         --conf spark.sql.sources.useV1SourceList=avro \
-        --jars ${gazelle_jni_jar} $*
+        --jars ${gazelle_jni_jar},${datasource_jar} $*
 # Use the following switches to disable gazelle-jni
 #        --conf spark.oap.sql.columnar.batchscan=false \
 #        --conf spark.oap.sql.columnar.hashagg=false \

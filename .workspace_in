@@ -11,7 +11,7 @@ fi
 
 echo "JAVA set to version $(javac -version)"
 export OLD_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${WORKSPACE}/components/xiphos-datasource/cpp/build
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${WORKSPACE}/xiphos-spark-integration/xiphos-datasource/cpp/build
 
 export w=$WORKSPACE
 alias b='$WORKSPACE/tools/build_gazelle_jni.sh -p'

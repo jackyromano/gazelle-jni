@@ -21,7 +21,7 @@ public:
     virtual arrow::Status Next(std::shared_ptr<arrow::RecordBatch>* out) override; 
 private:
     std::string execution_id;
-}
+};
 
 class XiphosParser {
 public:
@@ -31,6 +31,7 @@ public:
     std::shared_ptr<ResultIterator<arrow::RecordBatch>> getResIter();
 private:
     std::string execution_id;
+    std::unordered_map<uint64_t, std::string> functions_map_;
 };
 
 }

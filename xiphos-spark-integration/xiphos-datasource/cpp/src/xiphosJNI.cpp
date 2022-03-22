@@ -10,7 +10,7 @@ using namespace std;
 using namespace daxl;
 
 
-static bool verbose = false;
+static bool verbose = true;
 
 jint throwNoClassDefError( JNIEnv *env, const std::string & message )
 {
@@ -82,6 +82,7 @@ JNIEXPORT jstring JNICALL Java_com_intel_dbio_sources_datasourcev2_xiphosv2_Xiph
 
     }
     retval += "]}";
+    cout << _tableName << " schema:\n" << retval << "\n----\n";
     return env->NewStringUTF(retval.c_str());
 }
 
