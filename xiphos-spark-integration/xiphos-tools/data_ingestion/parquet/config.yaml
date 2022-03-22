@@ -1,0 +1,16 @@
+{
+  se : {
+    host : localhost,
+    port : 50052
+  },
+
+  planner : {
+    host : localhost,
+    port : 6568
+  },
+
+  master : {
+    host : localhost,
+    port : 6568
+  }
+}

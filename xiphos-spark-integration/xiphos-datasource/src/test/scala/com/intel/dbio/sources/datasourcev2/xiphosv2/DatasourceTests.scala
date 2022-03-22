@@ -37,7 +37,7 @@ class DatasourceTests {
     assertTrue(df.schema.length == 3)
   }
   private def validateFilter(df: DataFrame, expectedItems : Int) : Boolean = {
-    val filtered_df = df.where("value = \"2\"")
+    val filtered_df = df.where("id=2")
     filtered_df.explain()
     filtered_df.show(30)
     println(filtered_df.count)
@@ -45,11 +45,8 @@ class DatasourceTests {
   }
 
   def validateSchema(schema : StructType): Boolean = {
-    var isSchemaOk : Boolean = schema.length == 2
+    var isSchemaOk : Boolean = schema.length == 1
     isSchemaOk = isSchemaOk && schema(0).name == "id"
-    isSchemaOk = isSchemaOk && schema(0).dataType.getClass == IntegerType.getClass
-    isSchemaOk = isSchemaOk && schema(1).name == "value"
-    isSchemaOk = isSchemaOk && schema(1).dataType.getClass == StringType.getClass
     isSchemaOk
   }
 
@@ -60,7 +57,7 @@ class DatasourceTests {
     val table2 = spark.read.format(datasourceName).load("test_table_2")
     table2.createTempView("test_table_2")
     val query = spark.sql( """
-      select t1.value, t2.second_value
+      select t1.id, t2.second_value
       from test_table_1 t1 join test_table_2 as t2 on t1.id = t2.id
       where t2.second_value > 2 and t2.second_value < 5 and t1.id > 2 and t1.id < 5
       order by t2.second_value

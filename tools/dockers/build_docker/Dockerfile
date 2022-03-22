@@ -19,7 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y git
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y cmake
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libssl-dev libcurl4 libcurl4-openssl-dev zlib1g-dev zlib1g curl
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libboost-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libboost-all-dev
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tig
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ccache
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y htop
@@ -27,6 +27,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y ctags
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y bash-completion
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
+RUN wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+RUN DEBIAN_FRONTEND=noninteractive apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+RUN DEBIAN_FRONTEND=noninteractive apt update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libarrow-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y libparquet-dev
 
 RUN echo "installating NB dependencies"
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
