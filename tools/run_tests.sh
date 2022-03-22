@@ -9,6 +9,8 @@ mydir=$(realpath $(dirname $0))
 root=$mydir/..
 
 export DAXL_CONFIG_FILE=$root/artifacts/config.yaml
+#Update LD_LIBRARY_PATH so plan_tester pickes the colmunar_jni .so
+export LD_LIBRARY_PATH=$root/artifacts
 
 function test_xiphos_datasource () {
     cd $root/xiphos-spark-integration/xiphos-datasource
