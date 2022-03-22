@@ -48,5 +48,5 @@ cp -r tests $artifacts_dir
 cp xiphos-spark-integration/resources/config.yaml $artifacts_dir
 cp xiphos-spark-integration/xiphos-tools/build/table_info/table_info $artifacts_dir
 cp xiphos-spark-integration/xiphos-tools/build/data_ingestion/parquet/xiphos-parquet-loader $artifacts_dir   
-rsync -Pa cpp/build/releases/* $artifacts_dir/
+cp -r --preserve=links cpp/build/releases/* $artifacts_dir/
 popd 
