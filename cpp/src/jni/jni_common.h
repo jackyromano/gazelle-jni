@@ -35,8 +35,8 @@
 #include <utility>
 #include <vector>
 
-#include "proto/protobuf_utils.h"
-#include "proto/substrait_utils.h"
+#include "compute/protobuf_utils.h"
+#include "compute/substrait_utils.h"
 
 static jclass io_exception_class;
 static jclass runtime_exception_class;
@@ -364,11 +364,22 @@ arrow::Status ParseSubstraitPlan(
   jbyte* exprs_bytes = env->GetByteArrayElements(exprs_arr, 0);
 
   ExportBytes(reinterpret_cast<uint8_t*>(exprs_bytes), exprs_len);
+#ifdef DEBUG
+  auto maybe_plan_json = SubstraitToJSON(
+      "Plan", arrow::Buffer(reinterpret_cast<const uint8_t*>(exprs_bytes), exprs_len));
+  if (maybe_plan_json.status().ok()) {
+    std::cout << std::string(50, '#') << " received substrait::Plan:" << std::endl;
+    std::cout << maybe_plan_json.ValueOrDie() << std::endl;
+  } else {
+    std::cout << "Error parsing substrait plan to json" << std::endl;
+  }
+#endif
+
   if (!ParseProtobuf(reinterpret_cast<uint8_t*>(exprs_bytes), exprs_len, &ws_plan)) {
     env->ReleaseByteArrayElements(exprs_arr, exprs_bytes, JNI_ABORT);
     return arrow::Status::UnknownError("Unable to parse");
   }
-  auto parser = std::make_shared<SubstraitParser>();
+  auto parser = std::make_shared<gazellejni::compute::SubstraitParser>();
   parser->ParsePlan(ws_plan);
   *out_iter = parser->getResIter();
   return arrow::Status::OK();

@@ -15,16 +15,18 @@
  * limitations under the License.
  */
 
-#include "common/result_iterator.h"
+#include "substrait/algebra.pb.h"
 #include "substrait/capabilities.pb.h"
-#include "substrait/expression.pb.h"
 #include "substrait/extensions/extensions.pb.h"
 #include "substrait/function.pb.h"
 #include "substrait/parameterized_types.pb.h"
 #include "substrait/plan.pb.h"
-#include "substrait/relations.pb.h"
 #include "substrait/type.pb.h"
 #include "substrait/type_expressions.pb.h"
+#include "utils/result_iterator.h"
+
+namespace gazellejni {
+namespace compute {
 
 class SubstraitParser {
  public:
@@ -50,3 +52,6 @@ class SubstraitParser {
   std::unordered_map<uint64_t, std::string> functions_map_;
   class WholeStageResultIterator;
 };
+
+}  // namespace compute
+}  // namespace gazellejni

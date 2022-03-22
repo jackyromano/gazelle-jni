@@ -75,10 +75,16 @@ case class TransformGuardRule() extends Rule[SparkPlan] {
           if (!enableColumnarBatchScan) return false
           new BatchScanExecTransformer(plan.output, plan.scan)
         case plan: FileSourceScanExec =>
-          if (plan.supportsColumnar) {
-            return false
-          }
-          plan
+          if (!enableColumnarBatchScan) return false
+          new FileSourceScanExecTransformer(plan.relation,
+            plan.output,
+            plan.requiredSchema,
+            plan.partitionFilters,
+            plan.optionalBucketSet,
+            plan.optionalNumCoalescedBuckets,
+            plan.dataFilters,
+            plan.tableIdentifier,
+            plan.disableBucketedScan)
         case plan: InMemoryTableScanExec =>
           if (plan.relation.cacheBuilder.serializer
               .isInstanceOf[ArrowColumnarCachedBatchSerializer]) {
@@ -125,7 +131,10 @@ case class TransformGuardRule() extends Rule[SparkPlan] {
           if (!transformer.doValidate()) return false
           transformer
         case plan: ShuffleExchangeExec =>
-          return false
+          if (!enableColumnarShuffle) return false
+          new ColumnarShuffleExchangeExec(
+            plan.outputPartitioning,
+            plan.child)
         case plan: ShuffledHashJoinExec =>
           if (!enableColumnarShuffledHashJoin) return false
           val transformer = ShuffledHashJoinExecTransformer(

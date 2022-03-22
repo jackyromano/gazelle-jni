@@ -54,7 +54,7 @@
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
         <plugins>
-                <plugin>
+                <!--plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <executions>
@@ -71,7 +71,7 @@
                         </execution>
 
                     </executions>
-                </plugin>
+                </plugin-->
         </plugins>
         <pluginManagement>
             <plugins>
@@ -157,6 +157,9 @@
                         <filereports>TestSuiteReport.txt</filereports>
                         <runpath>project.build.outputDirectory</runpath>
                         <!-- Comma separated list of JUnit test class names to execute -->
+                        <environmentVariables>
+                            <DAXL_CONFIG_FILE>${project.basedir}/resources/config.yaml</DAXL_CONFIG_FILE>
+                        </environmentVariables>
                     </configuration>
                     <executions>
                         <execution>
