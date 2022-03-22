@@ -19,6 +19,7 @@ function test_xiphos_datasource () {
 test_xiphos_datasource
 
 # basic plan_tester test to ensure that it doesn't crash on simple test
+chmod +x $root/artifacts/plan_tester
 $root/artifacts/plan_tester $root/tests/plan1.substrait
 # todo - add end-to-end gazelle tests
 
