@@ -383,6 +383,7 @@ arrow::Status ParseSubstraitPlan(
     return arrow::Status::UnknownError("Unable to parse");
   }
 
+#define DONT_USE_XIPHOS
 #ifdef DONT_USE_XIPHOS
   auto parser = std::make_shared<gazellejni::compute::SubstraitParser>();
 #else

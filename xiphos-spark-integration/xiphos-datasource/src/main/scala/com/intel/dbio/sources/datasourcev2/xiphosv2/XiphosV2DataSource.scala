@@ -1,6 +1,7 @@
 package com.intel.dbio.sources.datasourcev2.xiphosv2
 
 import breeze.linalg.min
+
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability, TableProvider}
 import org.apache.spark.sql.connector.expressions.Transform
@@ -10,9 +11,15 @@ import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.apache.spark.sql.vectorized.ColumnarBatch
-
 import java.util
 import scala.collection.JavaConverters._
+
+import org.apache.spark.sql.execution.datasources.v2.FileScan
+
+//import com.intel.oap.execution.{NativeFilePartition, NativeSubstraitPartition}
+
+import org.apache.spark.sql.execution.datasources.{FilePartition, PartitionedFile}
+
 
 class DefaultSource extends TableProvider {
   var verbose = false;
@@ -53,11 +60,12 @@ class XiphosV2BatchTable(val _properties : util.Map[String, String]) extends Tab
   }
 }
 
-class XiphosV2ScanBuilder(options : CaseInsensitiveStringMap) extends ScanBuilder with SupportsPushDownFilters {
+class XiphosV2ScanBuilder(options : CaseInsensitiveStringMap) extends ScanBuilder /* with SupportsPushDownFilters */ {
 
   var  _pushedFilters = Array[Filter] ()
 
 
+  /**
   override def pushFilters(filters: Array[Filter]): Array[Filter] = {
     println("Got " + filters.length + "  pushed filters")
     for (i <- 0 until filters.length) {
@@ -70,7 +78,7 @@ class XiphosV2ScanBuilder(options : CaseInsensitiveStringMap) extends ScanBuilde
   }
 
   override def pushedFilters(): Array[Filter] = _pushedFilters
-  // TODO - proprage filters all the way down to XiphosV2PartitionReader
+  **/
   override def build(): Scan = new XiphosV2Scan(options)
 }
 
@@ -84,7 +92,7 @@ class XiphosV2Scan(val options: CaseInsensitiveStringMap) extends Scan with Batc
     val tableName = options.get("path")
     var parts : Array[InputPartition] = Array.empty;
     for (i <- 0 until n_partitions) {
-      parts = parts :+ new XiphosV2Partition(tableName, i * 5 * batchSize, (i + 1) * 5 * batchSize, batchSize)
+      parts = parts :+ new XiphosV2Partition(tableName, i, i * 5 * batchSize, (i + 1) * 5 * batchSize, batchSize)
     }
     parts
   }
@@ -92,7 +100,8 @@ class XiphosV2Scan(val options: CaseInsensitiveStringMap) extends Scan with Batc
   override def createReaderFactory(): PartitionReaderFactory = new XiphosV2PartitionReaderFactory()
 }
 
-class XiphosV2Partition(val tableName : String, val start:Int, val end: Int, val batchSize : Int) extends InputPartition
+class XiphosV2Partition(val tableName : String, val partitionIndex: Int, val start:Int, val end: Int, val batchSize : Int) extends
+  FilePartition(partitionIndex, Array[PartitionedFile](PartitionedFile(null, tableName, 0, 0)))
 
 class XiphosV2PartitionReaderFactory extends PartitionReaderFactory {
 
