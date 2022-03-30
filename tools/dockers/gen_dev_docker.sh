@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker_server="dbio-runner-vm1.iil.intel.com:5000"
+docker_server="dbio-dev-build1.iil.intel.com:5000"
 mydir=$(dirname $0)
 
 if [ "$#" -eq "0" ]; then
