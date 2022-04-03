@@ -1,6 +1,6 @@
 #!/bin/bash
 
-server_name=dbio-runner-vm1.iil.intel.com:5000
+server_name=dbio-dev-build1.iil.intel.com:5000
 
 if [ "$#" -ne "2" ]; then
     echo "Usage: $0 <docker base name> <spark port>"
