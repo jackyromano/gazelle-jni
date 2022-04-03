@@ -1,4 +1,4 @@
-FROM dbio-runner-vm1.iil.intel.com:5000/gazelle-jni-ci-image:latest
+FROM dbio-dev-build1.iil.intel.com:5000/gazelle-jni-ci-image:latest
 
 ARG USER_NAME
 ARG USER_ID
