@@ -374,7 +374,9 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeCreateKernelWi
   gandiva::FieldVector ws_ret_types;
   if (verbose) std::cout << "start to parse" << std::endl;
   std::shared_ptr<ResultIterator<arrow::RecordBatch>> res_iter;
+  std::cout << "res_iter is " << res_iter.get() << std::endl;
   msg = ParseSubstraitPlan(env, ws_exprs_arr, &res_iter);
+  std::cout << "res_iter after parsing is " << res_iter.get() << std::endl;
   if (!msg.ok()) {
     std::string error_message =
         "failed to parse expressions protobuf, err msg is " + msg.message();
@@ -382,7 +384,7 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeCreateKernelWi
   }
   auto ws_result_iterator = std::dynamic_pointer_cast<ResultIteratorBase>(res_iter);
   jlong handle = batch_iterator_holder_.Insert(std::move(ws_result_iterator));
-  if (verbose) std::cout << "CreateKernelWithIterator - handle: " << handle << std::endl;
+  if (verbose) std::cout << "CreateKernelWithIterator - handle: " << handle << " ptr: " << res_iter.get()  << std::endl;
   return handle;
 }
 
@@ -402,7 +404,7 @@ JNIEXPORT jboolean JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeHas
     JniThrow(error_message);
   }
   jboolean hasNext = iter->HasNext();
-  if (verbose) std::cout << "HasNext(" << id << "): " << hasNext << std::endl;
+  if (verbose) std::cout << "HasNext(" << id << "): " << hasNext << " ptr " << iter.get() << std::endl;
   return hasNext;
   JNI_METHOD_END(false)
 }
@@ -417,9 +419,13 @@ JNIEXPORT jobject JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeNext
   std::shared_ptr<arrow::RecordBatch> out;
   if (!iter->HasNext()) return nullptr;
   JniAssertOkOrThrow(iter->Next(&out), "nativeNext: get Next() failed");
+  std::cout << "Get batch from iter\n";
+  arrow::PrettyPrint(*out, 0, &std::cout);
   jbyteArray serialized_record_batch =
       JniGetOrThrow(ToBytes(env, out), "Error deserializing message");
-  if (verbose) {
+  std::cout << "Serialization done\n";
+  std::cout << "got record ptr: " << out.get() << std::endl;
+  if (false && verbose && out.get() != nullptr) {
     std::cout << "Next RecordBatch cols: " << out->num_columns()
               << " rows: " << out->num_rows() << std::endl;
     for (int i = 0; i < out->num_columns(); i++) {

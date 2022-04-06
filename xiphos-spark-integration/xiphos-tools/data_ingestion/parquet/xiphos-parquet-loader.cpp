@@ -86,8 +86,9 @@ daxl::Status createNewTable(
     } else if (type_name == "timestamp") {
       type = arrow::date64();
     }
+    // force dict-encoding to false due to NB bug
     table->addColumn(
-        Column(type, precision, scale, name, is_dictionary_encoded));
+        Column(type, precision, scale, name, /* is_dictionary_encoded */ false));
   }
 
   for (auto &tup : partitions) {

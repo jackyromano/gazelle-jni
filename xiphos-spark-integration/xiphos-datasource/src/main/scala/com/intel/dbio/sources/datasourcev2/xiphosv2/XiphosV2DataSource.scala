@@ -88,7 +88,7 @@ class XiphosV2Scan(val options: CaseInsensitiveStringMap) extends Scan with Batc
 
   override def planInputPartitions(): Array[InputPartition] = {
     val batchSize = options.getOrDefault("batch_size", "3").toInt
-    val n_partitions = options.getOrDefault("num_partitions", "2").toInt
+    val n_partitions = options.getOrDefault("num_partitions", "1").toInt
     val tableName = options.get("path")
     var parts : Array[InputPartition] = Array.empty;
     for (i <- 0 until n_partitions) {

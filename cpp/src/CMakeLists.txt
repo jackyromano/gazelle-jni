@@ -218,8 +218,11 @@ macro(build_arrow STATIC_ARROW)
                                      INTERFACE_INCLUDE_DIRECTORIES
                                       "${ARROW_PREFIX}/include")
     add_dependencies(Arrow::gandiva arrow_ep)
+    #link_directories(/usr/neuroblade/nb-daxl/lib)
+    #set(NB_LIBRARIES neuroblade-daxl)
+    #target_link_libraries(spark_columnar_jni {NB_LIBRARIES}  PRIVATE Arrow::arrow Arrow::gandiva Threads::Threads)
     target_link_libraries(spark_columnar_jni PRIVATE Arrow::arrow Arrow::gandiva Threads::Threads)
-
+    
   else()
 
     ExternalProject_Add_Step(arrow_ep copy_arrow_binary_400_0_0
@@ -450,19 +453,25 @@ set(SPARK_COLUMNAR_PLUGIN_SRCS
         )
 
 file(MAKE_DIRECTORY ${root_directory}/releases)
+include_directories(/usr/neuroblade/nb-daxl/include)
 add_library(spark_columnar_jni SHARED ${SPARK_COLUMNAR_PLUGIN_SRCS})
 add_dependencies(spark_columnar_jni jni_proto)
+
+#link_directories(/usr/neuroblade/nb-daxl/lib)
+set(NB_LIBRARIES /usr/neuroblade/nb-daxl/lib/libneuroblade-daxl.so)
+set(NB_STATIC_LIBRARIES /home/yromano/projects/jni3/libneuroblade-daxl.so)
+target_link_libraries(spark_columnar_jni LINK_PRIVATE ${NB_STATIC_LIBRARIES})
 
 if(BUILD_PROTOBUF)
   build_protobuf()
   message(STATUS "Building ProtoBuf from Source: ${BUILD_PROTOBUF}")
-  target_link_libraries(spark_columnar_jni
-                        LINK_PRIVATE protobuf::libprotobuf)
+  #target_link_libraries(spark_columnar_jni ${NB_LIBRARIES} LINK_PRIVATE protobuf::libprotobuf)
+  target_link_libraries(spark_columnar_jni LINK_PRIVATE protobuf::libprotobuf)
 else()
   find_protobuf()
   message(STATUS "Use existing ProtoBuf libraries: ${PROTOBUF_LIBRARY}")
-  target_link_libraries(spark_columnar_jni
-                        LINK_PUBLIC ${PROTOBUF_LIBRARY})
+  #target_link_libraries(spark_columnar_jni LINK_PUBLIC ${PROTOBUF_LIBRARY} ${NB_LIBRARIES})
+  target_link_libraries(spark_columnar_jni LINK_PUBLIC ${PROTOBUF_LIBRARY})
 endif()
 
 add_custom_command(OUTPUT ${PROTO_OUTPUT_FILES}
@@ -514,3 +523,5 @@ install(FILES ${source_root_directory}/resources/libhdfs.so
 install(FILES ${source_root_directory}/resources/libprotobuf.so.13
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(plan_tester)
+
+

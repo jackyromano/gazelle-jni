@@ -21,7 +21,7 @@ datasource_jar=${GAZELLE_JNI_HOME}/xiphos-spark-integration/xiphos-datasource/ta
 
 ${SPARK_HOME}/bin/spark-shell \
         --verbose \
-        --master local \
+        --master "local[1]" \
         --driver-memory 10G \
         --conf spark.driver.extraClassPath=${gazelle_jni_jar}:${datasource_jar} \
         --conf spark.executor.extraClassPath=${gazelle_jni_jar}:${datasource_jar} \
