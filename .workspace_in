@@ -18,3 +18,4 @@ alias b='$WORKSPACE/tools/build_gazelle_jni.sh -p'
 alias t='$WORKSPACE/scripts/jni_shell < $WORKSPACE/tests/gazelle_jni_test.scala'
 export SPARK_HOME=$WORKSPACE/spark-3.1.1-bin-hadoop2.7
 export DAXL_CONFIG_FILE=${WORKSPACE}/xiphos-spark-integration/resources/config.yaml
+alias s='stty sane'

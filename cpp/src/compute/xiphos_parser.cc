@@ -1,8 +1,14 @@
 #include "xiphos_parser.h"
 #include <arrow/pretty_print.h>
+#include <arrow/c/bridge.h>
+#include <arrow/record_batch.h>
+#include <memory>
+#include <unistd.h>
+
 using namespace daxl;
 static bool verbose = true;
 
+using namespace std;
 gazellejni::compute::XiphosParser::XiphosParser()
 {
   std::cout << "Constructor\n";
@@ -30,7 +36,7 @@ void gazellejni::compute::XiphosParser::ParsePlan(const substrait::Plan &splan)
 
     daxl::SubTree subtree;
     //daxl::Pipeline pipeline("lineitem", "p1");
-    daxl::Pipeline pipeline("ints", "p1");
+    daxl::Pipeline pipeline("strs1", "p1");
 #if 0
   for (auto& sextension : splan.extensions()) {
     if (!sextension.has_extension_function()) {
@@ -81,9 +87,21 @@ std::shared_ptr<ResultIterator<arrow::RecordBatch>> gazellejni::compute::XiphosP
 }
 
 
+static void print(ArrowSchema * schema, int indent = 0)
+{
+
+    cout << string(indent * 4, ' ') << "Name: " << schema->name << endl;
+    cout << string(indent * 4, ' ') << "Format: " << schema->format << endl;
+    cout << string(indent * 4, ' ') << "Metadata: " << schema->metadata << endl;
+    cout << string(indent * 4, ' ') << "Flags: " << schema->flags << endl;
+    cout << string(indent * 4, ' ') << "n_children: " << schema->n_children << endl;
+    for (int i = 0; i < schema->n_children; i++) {
+        print(schema->children[i], indent + 1);
+    }
+}
+
 bool gazellejni::compute::XiphosResultIterator::HasNext()  {
 
-    std::cout << ">> Xiphos Result Iterator HasNext\n";
     if(!is_plan_executed_){
         std::cout << "Execute: " << execution_id_ << std::endl;
         execution_.execute(execution_id_);
@@ -91,14 +109,33 @@ bool gazellejni::compute::XiphosResultIterator::HasNext()  {
         batch_ = nullptr;
         is_consumed_ = false;
     }
-    std::cout << "Get Next Chunk1" << std::endl;
 
-    if (!is_consumed_ && batch_ == nullptr) {
-        batch_ = execution_.getNextRowChunk();
+    if (getenv("GLUTEN_JNI_DEBUG") != nullptr) {
+        cout << "Please attach your debugger to procoess " << getpid() << endl;
+        sleep(20);
+        string s;
+        cin  >> s;
+        cout << "continuing\n";
     }
-    std::cout << "hasNext has a batch\n";
+    
+    if (!is_consumed_ && batch_ == nullptr) {
+        ArrowArray res_array;
+        ArrowSchema res_schema;
+        cout << "Read new chunk\n";
+        if (execution_.getNextRowChunk(&res_array, &res_schema)) {
+            arrow::Result<std::shared_ptr<arrow::RecordBatch>> res = arrow::ImportRecordBatch(&res_array, &res_schema);
+            if (res.ok()) {
+                batch_ = res.ValueOrDie();
+                cout << "Got new batch from Xiphos\n";
+            } else {
+                cerr << "ImportRecordBatch failed\n";
+            }
+        } else {
+            batch_ = nullptr;
+        }
+    }
     if (batch_ != nullptr) {
-        std::cout << "batch is valid\n";
+        std::cout << "HasNext has batch\n";
     } else {
         is_consumed_ = true;
         std::cout << "XiphosResultIterator consumed\n";
@@ -114,8 +151,6 @@ arrow::Status gazellejni::compute::XiphosResultIterator::Next(std::shared_ptr<ar
         std::cout << "getResIterator" << std::endl;
         *out = batch_;
         std::cout << "out assigned\n";
-        arrow::PrettyPrint(*out->get(), 0, &std::cout); 
-
         batch_ = nullptr;
         return arrow::Status::OK();
     }

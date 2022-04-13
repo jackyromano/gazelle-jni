@@ -47,15 +47,16 @@ int main(int argc, char* argv[]) {
 
   cout << "============= RESULTS batches ==================" << endl;
   while (out_iter->HasNext()) {
-    cout << "testing HasNext second time " << (out_iter->HasNext() ? "TRUE" : "FALSE")  << endl;
     shared_ptr<arrow::RecordBatch> record;
     if (out_iter->Next(&record) != arrow::Status::OK()) {
       cout << "Ooop, error" << endl;
       break;
     }
-    cout << "got new record\n";
+    cout << "\nSchema: " << endl;
+    arrow::PrettyPrint(*record->schema(), 0, &cout);
+    cout << "\nData:\n";
     arrow::PrettyPrint(*record, 0, &cout);
-    cout << "testing HasNext third time " << (out_iter->HasNext() ? "TRUE" : "FALSE")  << endl;
+    cout << "\n";
   }
   cout << "===============================================" << endl;
   return 0;

@@ -86,7 +86,7 @@ if [ $BUILD_ARROW == "ON" ]; then
             -DARROW_FILESYSTEM=ON \
             -DARROW_JSON=ON \
             -DARROW_CSV=ON \
-            -DARROW_FLIGHT=OFF \
+            -DARROW_FLIGHT=ON \
             -DARROW_JEMALLOC=ON \
             -DARROW_SIMD_LEVEL=AVX2 \
             -DARROW_RUNTIME_SIMD_LEVEL=MAX \

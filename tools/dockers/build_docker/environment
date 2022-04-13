@@ -1,4 +1,4 @@
 PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-http_proxy=http://proxy.iil.intel.com:911
-https_proxy=http://proxy.iil.intel.com:912
+http_proxy=http://proxy-dmz.intel.com:912
+https_proxy=http://proxy-dmz.intel.com:912
 no_proxy=intel.com,.intel.com,localhost

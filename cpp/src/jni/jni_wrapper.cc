@@ -41,6 +41,7 @@
 #include "operators/c2r/columnar_to_row_converter.h"
 #include "operators/shuffle/splitter.h"
 #include "utils/result_iterator.h"
+#include <arrow/c/bridge.h>
 
 namespace {
 
@@ -395,9 +396,6 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeInitNative(
 JNIEXPORT jboolean JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeHasNext(
     JNIEnv* env, jobject obj, jlong id) {
   JNI_METHOD_START
-  if (verbose)
-    std::cout << "Java_com_intel_oap_vectorized_BatchIterator_nativeHasNext with " << id
-              << std::endl;
   auto iter = GetBatchIterator(env, id);
   if (iter == nullptr) {
     std::string error_message = "faked to get batch iterator";
@@ -411,27 +409,30 @@ JNIEXPORT jboolean JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeHas
 
 JNIEXPORT jobject JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeNext(
     JNIEnv* env, jobject obj, jlong id) {
+
   JNI_METHOD_START
-  if (verbose)
-    std::cout << "Java_com_intel_oap_vectorized_BatchIterator_nativeNext with " << id
-              << std::endl;
+
   auto iter = GetBatchIterator<arrow::RecordBatch>(env, id);
+
   std::shared_ptr<arrow::RecordBatch> out;
+
   if (!iter->HasNext()) return nullptr;
+
   JniAssertOkOrThrow(iter->Next(&out), "nativeNext: get Next() failed");
-  std::cout << "Get batch from iter\n";
-  arrow::PrettyPrint(*out, 0, &std::cout);
+
+  if (verbose) {
+    std::cout << "Result Schema\n";
+    arrow::PrettyPrint(*out->schema(), 0, &std::cout);
+    std::cout << "\nData:\n";
+    arrow::PrettyPrint(*out, 0, &std::cout);
+    std::cout << "\n";
+  }
+
   jbyteArray serialized_record_batch =
       JniGetOrThrow(ToBytes(env, out), "Error deserializing message");
+
   std::cout << "Serialization done\n";
-  std::cout << "got record ptr: " << out.get() << std::endl;
-  if (false && verbose && out.get() != nullptr) {
-    std::cout << "Next RecordBatch cols: " << out->num_columns()
-              << " rows: " << out->num_rows() << std::endl;
-    for (int i = 0; i < out->num_columns(); i++) {
-      std::cout << "Column " << i << ": " << out->column_name(i) << std::endl;
-    }
-  }
+
   return serialized_record_batch;
   JNI_METHOD_END(nullptr)
 }

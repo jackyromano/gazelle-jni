@@ -28,6 +28,7 @@ include(cmake/daxl.cmake)
 
 include_directories(csv)
 include_directories(${ARROW_INCLUDE_DIR})
+link_directories(${ARROW_INSTALL_DIR}/lib)
 
 file(GLOB_RECURSE source_files *.cpp)
 
