@@ -13,37 +13,37 @@
 
 
 namespace gazellejni {
-namespace compute {
+  namespace compute {
 
 
-class XiphosResultIterator : public ResultIterator<arrow::RecordBatch> 
-{ 
-public:
-    XiphosResultIterator(const std::string &);
-    virtual bool HasNext() override;
-    virtual arrow::Status Next(std::shared_ptr<arrow::RecordBatch>* out) override; 
-private:
-    std::string execution_id_;
-    bool is_plan_executed_ = false;
-    daxl::SubTreeExecutor execution_;
-    std::shared_ptr<arrow::RecordBatch> batch_;
-    bool is_consumed_;
-};
+    class XiphosResultIterator : public ResultIterator<arrow::RecordBatch> 
+    { 
+      public:
+        XiphosResultIterator(const std::string &);
+        virtual bool HasNext() override;
+        virtual arrow::Status Next(std::shared_ptr<arrow::RecordBatch>* out) override; 
+      private:
+        std::string execution_id_;
+        bool is_plan_executed_ = false;
+        daxl::SubTreeExecutor execution_;
+        std::shared_ptr<arrow::RecordBatch> batch_;
+        bool is_consumed_;
+    };
 
-class XiphosParser {
-public:
-    XiphosParser();
-    virtual ~XiphosParser();
-    void Init();
-    void ParsePlan(const substrait::Plan & plan);
-    std::shared_ptr<ResultIterator<arrow::RecordBatch>> getResIter();
-private:
-    std::string execution_id_;
-    void ParseRelRoot(const substrait::RelRoot& sroot, daxl::Pipeline & );
-    void ParseRel(const substrait::Rel&, daxl::Pipeline &);
-    void ParseReadRel(const substrait::ReadRel& sread, daxl::Pipeline &pipeline);
-};
+    class XiphosParser {
+      public:
+        XiphosParser();
+        virtual ~XiphosParser();
+        void Init();
+        void ParsePlan(const substrait::Plan & plan);
+        std::shared_ptr<ResultIterator<arrow::RecordBatch>> getResIter();
+      private:
+        std::string execution_id_;
+        void ParseRelRoot(const substrait::RelRoot& sroot, daxl::Pipeline & );
+        void ParseRel(const substrait::Rel&, daxl::Pipeline &);
+        void ParseReadRel(const substrait::ReadRel& sread, daxl::Pipeline &pipeline);
+    };
 
-}
+  }
 }
 

@@ -30,9 +30,8 @@ include_directories(csv)
 include_directories(${ARROW_INCLUDE_DIR})
 link_directories(${ARROW_INSTALL_DIR}/lib)
 
-file(GLOB_RECURSE source_files *.cpp)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_executable(xiphos-parquet-loader xiphos-parquet-loader.cpp)
+add_executable(xiphos-parquet-loader xiphos-parquet-loader.cc)
 target_link_libraries(xiphos-parquet-loader PUBLIC Boost::date_time parquet arrow  ${DAXL_LIBRARIES} )

@@ -45,7 +45,7 @@
 
 namespace {
 
-static bool verbose = true;
+static bool verbose = false;
 
 #define JNI_METHOD_START try {
 // macro ended
@@ -373,11 +373,8 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeCreateKernelWi
   // Get the ws iter
   gandiva::ExpressionVector ws_expr_vector;
   gandiva::FieldVector ws_ret_types;
-  if (verbose) std::cout << "start to parse" << std::endl;
   std::shared_ptr<ResultIterator<arrow::RecordBatch>> res_iter;
-  std::cout << "res_iter is " << res_iter.get() << std::endl;
   msg = ParseSubstraitPlan(env, ws_exprs_arr, &res_iter);
-  std::cout << "res_iter after parsing is " << res_iter.get() << std::endl;
   if (!msg.ok()) {
     std::string error_message =
         "failed to parse expressions protobuf, err msg is " + msg.message();
@@ -395,6 +392,7 @@ Java_com_intel_oap_vectorized_ExpressionEvaluatorJniWrapper_nativeInitNative(
 
 JNIEXPORT jboolean JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeHasNext(
     JNIEnv* env, jobject obj, jlong id) {
+
   JNI_METHOD_START
   auto iter = GetBatchIterator(env, id);
   if (iter == nullptr) {
@@ -413,11 +411,9 @@ JNIEXPORT jobject JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeNext
   JNI_METHOD_START
 
   auto iter = GetBatchIterator<arrow::RecordBatch>(env, id);
-
-  std::shared_ptr<arrow::RecordBatch> out;
-
   if (!iter->HasNext()) return nullptr;
 
+  std::shared_ptr<arrow::RecordBatch> out;
   JniAssertOkOrThrow(iter->Next(&out), "nativeNext: get Next() failed");
 
   if (verbose) {
@@ -430,8 +426,6 @@ JNIEXPORT jobject JNICALL Java_com_intel_oap_vectorized_BatchIterator_nativeNext
 
   jbyteArray serialized_record_batch =
       JniGetOrThrow(ToBytes(env, out), "Error deserializing message");
-
-  std::cout << "Serialization done\n";
 
   return serialized_record_batch;
   JNI_METHOD_END(nullptr)

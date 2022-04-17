@@ -4,6 +4,8 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project (xiphosJNI)
 
+add_compile_options(-Wno-attributes)
+
 set (JNI_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jni)
 set (JNI_HEADER ${JNI_HEADER_DIR}/com_intel_dbio_sources_datasourcev2_xiphosv2_XiphosJniImp.h)
 set (JNI_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../src/main/java/com/intel/dbio/sources/datasourcev2/xiphosv2/XiphosJniImp.java)
@@ -34,8 +36,8 @@ add_custom_command(
 )
 
 set (SRC
-    src/xiphosUtils.cpp
-    src/xiphosJNI.cpp
+    src/xiphosUtils.h
+    src/xiphosJNI.cc
     ${JNI_HEADER}
     )
 

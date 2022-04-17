@@ -25,5 +25,5 @@ set(NB_LIBRARIES ${NB_DAXL_DIR}/lib/libneuroblade-daxl.so)
 include_directories(/usr/neuroblade/nb-daxl/include)
 #link_directories(/usr/neuroblade/nb-daxl/lib)
 
-add_executable(table_info table_info.cpp)
+add_executable(table_info table_info.cc)
 target_link_libraries(table_info ${NB_LIBRARIES} ${ARROW_LIBRARIES})
