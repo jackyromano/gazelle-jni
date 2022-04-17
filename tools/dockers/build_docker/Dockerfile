@@ -47,7 +47,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
 # ignore installation errors for now
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y linux-headers-5.8.0-43-generic
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y linux-headers-generic linux-headers-5.8.0-43-generic
 # install neuroblade release. Change to pointer to use other releases
 RUN curl -uquery_dev:AP3pvecE8pWZbwtNuC7DFXBsuRif3Wi3GWvMurPZUfKZaxTcxUXZ1vvMuVuM -O "https://ubit-artifactory-il.intel.com/artifactory/queryspark-il-local/nb-releases/220413-c/release.tgz"
 RUN mkdir nb-release 

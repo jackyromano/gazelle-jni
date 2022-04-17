@@ -474,9 +474,7 @@ add_dependencies(spark_columnar_jni jni_proto)
 
 #link_directories(/usr/neuroblade/nb-daxl/lib)
 set(NB_LIBRARIES /usr/neuroblade/nb-daxl/lib/libneuroblade-daxl.so)
-set(NB_STATIC_LIBRARIES /home/yromano/projects/jni3/test_libs/libneuroblade-daxl.so)
-set(NB_TEST_LIBRARIES /home/yromano/projects/jni3/test_libs/libneuroblade-daxl.so)
-target_link_libraries(spark_columnar_jni LINK_PRIVATE ${NB_TEST_LIBRARIES})
+target_link_libraries(spark_columnar_jni LINK_PRIVATE ${NB_LIBRARIES})
 
 if(BUILD_PROTOBUF)
   build_protobuf()
