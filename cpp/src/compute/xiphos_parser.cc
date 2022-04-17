@@ -35,7 +35,6 @@ void gazellejni::compute::XiphosParser::ParsePlan(const substrait::Plan &splan)
 {
 
     daxl::SubTree subtree;
-    //daxl::Pipeline pipeline("lineitem", "p1");
     daxl::Pipeline pipeline("strs1", "p1");
 #if 0
   for (auto& sextension : splan.extensions()) {

@@ -33,9 +33,9 @@ class DatasourceTests {
 
   @Test
   def testJniStrings : Unit = {
-    val df = spark.read.format(datasourceName).load("ints")
-    df.createTempView("ints")
-    val query_df = spark.sql("select * from ints")
+    val df = spark.read.format(datasourceName).load("strs1")
+    df.createTempView("strs1")
+    val query_df = spark.sql("select * from strs1")
     query_df.explain
     query_df.show(10)
   }
