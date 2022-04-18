@@ -18,12 +18,36 @@ function test_xiphos_datasource () {
     cd $root
 }
 
-test_xiphos_datasource
+function reset_xiphos() {
+  sudo nbinsight-reset-se -t
+  /usr/neuroblade/nb-gilt/scripts/nbinsight-kill-gilt-service.sh
+  nohup /usr/neuroblade/nb-gilt/scripts/nbinsight-run-gilt-service.sh &
+}
+function load_strs_table() {
+  $root/artifacts/strs_ddl strs
+  $root/artifacts/etl_csv $root/artifacts/strs.csv
+}
 
-# basic plan_tester test to ensure that it doesn't crash on simple test
-chmod +x $root/artifacts/plan_tester
-$root/artifacts/plan_tester $root/tests/plan1.substrait
-# todo - add end-to-end gazelle tests
+function prep_artifacts() {
+  chmod +x $root/artifacts/plan_tester
+  chmod +x $root/artifacts/etl_csv
+  chmod +x $root/artifacts/strs_ddl
+}
+
+function test_plan_tester() {
+  $root/artifacts/plan_tester $root/tests/plan1.substrait
+}
+
+function test_spark() {
+  $root/tools/jni_shell < $root/tests/test_strs.scala
+}
+
+prep_artifacts
+reset_xiphos
+load_strs_table
+#test_xiphos_datasource
+test_plan_tester
+test_spark
 
 echo "Tests PASSED"
 exit 0

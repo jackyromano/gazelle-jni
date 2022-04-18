@@ -29,7 +29,7 @@ void gazellejni::compute::XiphosParser::Init() {
 
 void gazellejni::compute::XiphosParser::ParsePlan(const substrait::Plan &splan) {
   daxl::SubTree subtree;
-  daxl::Pipeline pipeline("strs1", "p1");
+  daxl::Pipeline pipeline("strs", "p1");
 #if 0
   for (auto& sextension : splan.extensions()) {
     if (!sextension.has_extension_function()) {

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.4)
 
 project(
-    neuroblade-daxl-samples
+    table_info
     VERSION 0.0.1
     DESCRIPTION "neuroblade daxl samples")
 
