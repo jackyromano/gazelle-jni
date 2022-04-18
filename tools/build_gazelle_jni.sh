@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mydir=$(dirname $0)
 root=$mydir/..
 do_clean="clean"
