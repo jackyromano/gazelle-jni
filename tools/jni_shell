@@ -15,8 +15,11 @@ fi
 
 version="1.2.0-snapshot"
 gazelle_jni_jar=${GAZELLE_JNI_HOME}/jvm/target/gazelle-jni-jvm-${version}-jar-with-dependencies.jar
-#datasource_jar=${GAZELLE_JNI_HOME}/xiphos-spark-integration/xiphos-datasource/target/xiphos-datasource-1.2.0-snapshot-jar-with-dependencies.jar       
 datasource_jar=${GAZELLE_JNI_HOME}/xiphos-spark-integration/xiphos-datasource/target/xiphos-datasource-1.2.0-snapshot.jar       
+if [ ! -f $gazelle_jni_jar ]; then
+  gazelle_jni_jar=$root/artifacts/gazelle-jni-jvm-${version}-jar-with-dependencies.jar
+  datasource_jar=$root/artifacts/target/xiphos-datasource-1.2.0-snapshot.jar       
+fi
 
 
 ${SPARK_HOME}/bin/spark-shell \
