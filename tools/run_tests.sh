@@ -11,6 +11,9 @@ root=$mydir/..
 export DAXL_CONFIG_FILE=$root/artifacts/config.yaml
 #Update LD_LIBRARY_PATH so plan_tester pickes the colmunar_jni .so
 export LD_LIBRARY_PATH=$root/artifacts
+if [ -z $SPARK_HOME ]; then
+  export SPARK_HOME=/opt/spark/spark-3.1.1-bin-hadoop2.7
+fi
 
 function test_xiphos_datasource () {
     cd $root/xiphos-spark-integration/xiphos-datasource
