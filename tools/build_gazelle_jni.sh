@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mydir=$(dirname $0)
 root=$mydir/..
 do_clean="clean"
@@ -48,5 +50,9 @@ cp -r tests $artifacts_dir
 cp xiphos-spark-integration/resources/config.yaml $artifacts_dir
 cp xiphos-spark-integration/xiphos-tools/build/table_info/table_info $artifacts_dir
 cp xiphos-spark-integration/xiphos-tools/build/data_ingestion/parquet/xiphos-parquet-loader $artifacts_dir   
+cp xiphos-spark-integration/xiphos-tools/build/nb-samples/strs_ddl $artifacts_dir   
+cp xiphos-spark-integration/xiphos-tools/build/nb-samples/etl_csv $artifacts_dir   
+cp xiphos-spark-integration/resources/strs.csv $artifacts_dir   
+cp xiphos-spark-integration/xiphos-datasource/cpp/build/libxiphosJNI.so $artifacts_dir   
 cp -r --preserve=links cpp/build/releases/* $artifacts_dir/
 popd 

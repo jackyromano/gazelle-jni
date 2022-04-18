@@ -8,62 +8,45 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 @Test
 class DatasourceTests {
   val datasourceName = "com.intel.dbio.sources.datasourcev2.xiphosv2"
+  val gazelle_jni_jar = "/home/yromano/projects/jni3/jvm/target/gazelle-jni-jvm-1.2.0-snapshot-jar-with-dependencies.jar"
   def initSession: SparkSession = {
-    val spark = SparkSession.builder().master("local[3]").getOrCreate()
+    val spark = SparkSession.builder().master("local[1]")
+      .config("spark.driver.extraClassPath", gazelle_jni_jar)
+      .config("spark.executor.extraClassPath",gazelle_jni_jar)
+      .config("spark.driver.cores","1")
+      .config("spark.executor.instances","12")
+      .config("spark.executor.cores","6")
+      .config("spark.executor.memory","20G")
+      .config("spark.memory.offHeap.size","80G")
+      .config("spark.task.cpus","1")
+      .config("spark.locality.wait","0s")
+      .config("spark.sql.shuffle.partitions","72")
+      .config("spark.plugins","com.intel.oap.GazellePlugin")
+      .config("spark.sql.sources.useV1SourceList","avro")
+      .config("spark.jars", gazelle_jni_jar)
+      .getOrCreate()
+    spark.sparkContext.setLogLevel("DEBUG")
     spark
   }
+
   val spark : SparkSession = initSession
 
-  def testTable(batchSize : Int) : Unit = {
-    val df = spark
-      .read
-      .format(datasourceName)
-      .option("batch_size", batchSize.toString)
-      .load("test_table_1")
-
-    assertTrue(validateSchema(df.schema))
-    assertTrue(validateFilter(df,  batchSize * 10))
+  @Test
+  def testJniStrings : Unit = {
+    val df = spark.read.format(datasourceName).load("strs1")
+    df.createTempView("strs1")
+    val query_df = spark.sql("select * from strs1")
+    query_df.explain
+    query_df.show(10)
   }
 
   @Test
-  def testTable1(): Unit = {
-    testTable(3)
-    testTable(batchSize =  1024)
-  }
-  @Test
-  def testTable2(): Unit = {
-    val df = spark.read.format(datasourceName).load("test_table_2")
-    df.show(10)
-    assertTrue(df.schema.length == 3)
-  }
-  private def validateFilter(df: DataFrame, expectedItems : Int) : Boolean = {
-    val filtered_df = df.where("id=2")
-    filtered_df.explain()
-    filtered_df.show(30)
-    println(filtered_df.count)
-    filtered_df.count == expectedItems // TODO - should be 1 if filter actually worked
-  }
-
-  def validateSchema(schema : StructType): Boolean = {
-    var isSchemaOk : Boolean = schema.length == 1
-    isSchemaOk = isSchemaOk && schema(0).name == "id"
-    isSchemaOk
-  }
-
-  @Test
-  def testXiphosMultipleTables() = {
-    val table1 = spark.read.format(datasourceName).load("test_table_1")
-    table1.createTempView("test_table_1")
-    val table2 = spark.read.format(datasourceName).load("test_table_2")
-    table2.createTempView("test_table_2")
-    val query = spark.sql( """
-      select t1.id, t2.second_value
-      from test_table_1 t1 join test_table_2 as t2 on t1.id = t2.id
-      where t2.second_value > 2 and t2.second_value < 5 and t1.id > 2 and t1.id < 5
-      order by t2.second_value
-      """)
-    query.explain
-    query.show()
+  def testJniParquet: Unit = {
+    val test_file = "../resources/test_strings.parquet"
+    val df = spark.read.parquet(test_file)
+    df.createTempView("test_strings")
+    val query_df = spark.sql("select * from test_strings")
+    query_df.show(10)
   }
 }
 

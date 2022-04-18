@@ -1,6 +1,7 @@
 package com.intel.dbio.sources.datasourcev2.xiphosv2
 
 import breeze.linalg.min
+
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability, TableProvider}
 import org.apache.spark.sql.connector.expressions.Transform
@@ -10,9 +11,15 @@ import org.apache.spark.sql.sources.Filter
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.apache.spark.sql.vectorized.ColumnarBatch
-
 import java.util
 import scala.collection.JavaConverters._
+
+import org.apache.spark.sql.execution.datasources.v2.FileScan
+
+//import com.intel.oap.execution.{NativeFilePartition, NativeSubstraitPartition}
+
+import org.apache.spark.sql.execution.datasources.{FilePartition, PartitionedFile}
+
 
 class DefaultSource extends TableProvider {
   var verbose = false;
@@ -36,7 +43,6 @@ class DefaultSource extends TableProvider {
 
 class XiphosV2BatchTable(val _properties : util.Map[String, String]) extends Table with SupportsRead {
   val tableName = _properties.get("path")
-  println("tableName:" + tableName)
   override def name(): String = this.getClass.toString + "_" + tableName
 
   override def schema(): StructType = {
@@ -46,31 +52,12 @@ class XiphosV2BatchTable(val _properties : util.Map[String, String]) extends Tab
   override def capabilities(): util.Set[TableCapability] = Set(TableCapability.BATCH_READ).asJava
 
   override def newScanBuilder(options: CaseInsensitiveStringMap): ScanBuilder = {
-    println("get new scan builder with " + options.size() + " items:")
-    options.forEach(  (key: String, value : String) => println(key + " : " + value))
-    println("--------------------------------------------------------")
     new XiphosV2ScanBuilder(options)
   }
 }
 
-class XiphosV2ScanBuilder(options : CaseInsensitiveStringMap) extends ScanBuilder with SupportsPushDownFilters {
+class XiphosV2ScanBuilder(options : CaseInsensitiveStringMap) extends ScanBuilder {
 
-  var  _pushedFilters = Array[Filter] ()
-
-
-  override def pushFilters(filters: Array[Filter]): Array[Filter] = {
-    println("Got " + filters.length + "  pushed filters")
-    for (i <- 0 until filters.length) {
-      println("Filter " + i + " is " + filters(i).toString)
-    }
-    _pushedFilters = filters
-    // return an empty array as if all the filters are acceptable. In real life, should return the filters
-    // that needs to be evaluated after scan
-    Array[Filter]()
-  }
-
-  override def pushedFilters(): Array[Filter] = _pushedFilters
-  // TODO - proprage filters all the way down to XiphosV2PartitionReader
   override def build(): Scan = new XiphosV2Scan(options)
 }
 
@@ -80,11 +67,11 @@ class XiphosV2Scan(val options: CaseInsensitiveStringMap) extends Scan with Batc
 
   override def planInputPartitions(): Array[InputPartition] = {
     val batchSize = options.getOrDefault("batch_size", "3").toInt
-    val n_partitions = options.getOrDefault("num_partitions", "2").toInt
+    val n_partitions = options.getOrDefault("num_partitions", "1").toInt
     val tableName = options.get("path")
     var parts : Array[InputPartition] = Array.empty;
     for (i <- 0 until n_partitions) {
-      parts = parts :+ new XiphosV2Partition(tableName, i * 5 * batchSize, (i + 1) * 5 * batchSize, batchSize)
+      parts = parts :+ new XiphosV2Partition(tableName, i, i * 5 * batchSize, (i + 1) * 5 * batchSize, batchSize)
     }
     parts
   }
@@ -92,7 +79,8 @@ class XiphosV2Scan(val options: CaseInsensitiveStringMap) extends Scan with Batc
   override def createReaderFactory(): PartitionReaderFactory = new XiphosV2PartitionReaderFactory()
 }
 
-class XiphosV2Partition(val tableName : String, val start:Int, val end: Int, val batchSize : Int) extends InputPartition
+class XiphosV2Partition(val tableName : String, val partitionIndex: Int, val start:Int, val end: Int, val batchSize : Int) extends
+  FilePartition(partitionIndex, Array[PartitionedFile](PartitionedFile(null, tableName, 0, 0)))
 
 class XiphosV2PartitionReaderFactory extends PartitionReaderFactory {
 
@@ -107,7 +95,6 @@ class XiphosV2PartitionReaderFactory extends PartitionReaderFactory {
 
 class XiphosV2ColumunarPartitionReader(partition : XiphosV2Partition) extends PartitionReader[ColumnarBatch] {
   val tableName = partition.tableName
-  println("Read partition: " + tableName + " from thread " + Thread.currentThread.getId)
   private val maxItemsPerBatch = partition.batchSize
   var index = partition.start
 
@@ -129,7 +116,6 @@ class XiphosV2ColumunarPartitionReader(partition : XiphosV2Partition) extends Pa
 
   override def get(): ColumnarBatch = {
     var n_items = min(partition.end - index, maxItemsPerBatch)
-    println(tableName + ": get data for " + (0 + index) +  "-" + (n_items + index) + " from " + Thread.currentThread.getId)
     columnarBatch.setNumRows(n_items)
 
     for (i <- 0 until n_items) {

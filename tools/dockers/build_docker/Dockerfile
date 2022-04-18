@@ -1,13 +1,14 @@
 FROM amr-cache-registry.caas.intel.com/cache/library/ubuntu:20.04
 
 
-ENV http_proxy=http://proxy-chain.intel.com:911
-ENV https_proxy=http://proxy-chain.intel.com:912
-ENV MAVEN_OPTS="-Dhttp.proxyHost=proxy-chain.intel.com -Dhttp.proxyPort=911 -Dhttp.nonProxyHosts=”localhost|*.intel.com -Dhttps.proxyHost=proxy-chain.intel.com -Dhttps.proxyPort=912"
+ENV http_proxy=http://proxy-dmz.intel.com:912
+ENV https_proxy=http://proxy-dmz.intel.com:912
+ENV no_proxy=.intel.com,localhost,127.0.0.1
+ENV MAVEN_OPTS="-Dhttp.proxyHost=proxy-dmz.intel.com -Dhttp.proxyPort=912 -Dhttp.nonProxyHosts=”localhost|*.intel.com -Dhttps.proxyHost=proxy-dmz.intel.com -Dhttps.proxyPort=912"
 
 # setup APT proxies
 
-RUN echo 'Acquire::http::Proxy "http://proxy-dmz.intel.com:911/"; Acquire::https::Proxy "http://proxy-dmz.intel.com:912/";' > /etc/apt/apt.conf.d/proxy
+RUN echo 'Acquire::http::Proxy "http://proxy-dmz.intel.com:912/"; Acquire::https::Proxy "http://proxy-dmz.intel.com:912/";' > /etc/apt/apt.conf.d/proxy
 
 # Update the base image OS and install wget and python
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
@@ -46,9 +47,9 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
 # ignore installation errors for now
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y linux-headers-5.8.0-43-generic
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y linux-headers-generic linux-headers-5.8.0-43-generic
 # install neuroblade release. Change to pointer to use other releases
-RUN curl -uquery_dev:AP3pvecE8pWZbwtNuC7DFXBsuRif3Wi3GWvMurPZUfKZaxTcxUXZ1vvMuVuM -O "https://ubit-artifactory-il.intel.com/artifactory/queryspark-il-local/nb-releases/220315-c/release.tgz"
+RUN curl -uquery_dev:AP3pvecE8pWZbwtNuC7DFXBsuRif3Wi3GWvMurPZUfKZaxTcxUXZ1vvMuVuM -O "https://ubit-artifactory-il.intel.com/artifactory/queryspark-il-local/nb-releases/220413-c/release.tgz"
 RUN mkdir nb-release 
 RUN tar zxf release.tgz -C nb-release
 RUN DEBIAN_FRONTEND=noninteractive nb-release/install.sh

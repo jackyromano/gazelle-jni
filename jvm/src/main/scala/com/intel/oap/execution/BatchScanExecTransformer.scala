@@ -33,7 +33,8 @@ class BatchScanExecTransformer(output: Seq[AttributeReference], @transient scan:
   override def filterExprs(): Seq[Expression] = if (scan.isInstanceOf[FileScan]) {
     scan.asInstanceOf[FileScan].dataFilters
   } else {
-    throw new UnsupportedOperationException(s"${scan.getClass.toString} is not supported")
+    Seq[Expression]()
+    // throw new UnsupportedOperationException(s"${scan.getClass.toString} is not supported")
   }
 
   override def outputAttributes(): Seq[Attribute] = output

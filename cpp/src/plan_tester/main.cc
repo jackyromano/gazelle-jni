@@ -12,6 +12,8 @@
 
 #include "compute/protobuf_utils.h"
 #include "compute/substrait_utils.h"
+#include "compute/xiphos_parser.h"
+
 
 using namespace std;
 
@@ -37,7 +39,8 @@ int main(int argc, char* argv[]) {
     cout << "Failed to parse plan\n";
     exit(1);
   }
-  auto parser = std::make_shared<gazellejni::compute::SubstraitParser>();
+  auto parser = std::make_shared<gazellejni::compute::XiphosParser>();
+  parser ->Init();
   parser->ParsePlan(ws_plan);
 
   shared_ptr<ResultIterator<arrow::RecordBatch>> out_iter = parser->getResIter();
@@ -49,7 +52,11 @@ int main(int argc, char* argv[]) {
       cout << "Ooop, error" << endl;
       break;
     }
+    cout << "\nSchema: " << endl;
+    arrow::PrettyPrint(*record->schema(), 0, &cout);
+    cout << "\nData:\n";
     arrow::PrettyPrint(*record, 0, &cout);
+    cout << "\n";
   }
   cout << "===============================================" << endl;
   return 0;

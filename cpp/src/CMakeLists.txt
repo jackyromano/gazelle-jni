@@ -17,6 +17,7 @@ set(ARROW_ROOT "/usr/local" CACHE PATH "Arrow Root dir")
 set(ARROW_BFS_INSTALL_DIR "/usr/local" CACHE PATH "Arrow Build from Source dir")
 set(ARROW_LIB_NAME arrow)
 set(GANDIVA_LIB_NAME gandiva)
+set(FLIGHT_LIB_NAME arrow_flight)
 set(ARROW_SHARED_LIBRARY_SUFFIX ".so.400")
 
 option(BUILD_ARROW "Build Arrow from Source" ON)
@@ -170,7 +171,7 @@ macro(build_arrow STATIC_ARROW)
                       -DARROW_WITH_FASTPFOR=ON
                       -DARROW_FILESYSTEM=ON
                       -DARROW_JSON=ON
-                      -DARROW_FLIGHT=OFF
+                      -DARROW_FLIGHT=ON
                       -DARROW_JEMALLOC=ON
                       -DARROW_SIMD_LEVEL=AVX2
                       -DARROW_RUNTIME_SIMD_LEVEL=MAX
@@ -219,7 +220,7 @@ macro(build_arrow STATIC_ARROW)
                                       "${ARROW_PREFIX}/include")
     add_dependencies(Arrow::gandiva arrow_ep)
     target_link_libraries(spark_columnar_jni PRIVATE Arrow::arrow Arrow::gandiva Threads::Threads)
-
+    
   else()
 
     ExternalProject_Add_Step(arrow_ep copy_arrow_binary_400_0_0
@@ -236,6 +237,12 @@ macro(build_arrow STATIC_ARROW)
                       WORKING_DIRECTORY "${ARROW_PREFIX}/"
     )
 
+    ExternalProject_Add_Step(arrow_ep copy_arrow_flight_binary_400_0_0
+                      COMMAND cp -a ${ARROW_PREFIX}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}${FLIGHT_LIB_NAME}${ARROW_SHARED_LIBRARY_SUFFIX} ${root_directory}/releases/
+                      COMMENT "Copy libarrow_flight.so.400.0.0 to releases/"
+                      DEPENDEES mkdir download update patch configure build install java_install
+                      WORKING_DIRECTORY "${ARROW_PREFIX}/"
+    )
 
     # Copy Arrow Headers to releases/include
     ExternalProject_Add_Step(arrow_ep copy_arrow_header
@@ -298,8 +305,19 @@ macro(find_arrow)
     message(STATUS "Gandiva Library Can Be Found in ${GANDIVA_LIB}")
   endif()
 
+  find_library(FLIGHT_LIB NAMES ${CMAKE_SHARED_LIBRARY_PREFIX}${FLIGHT_LIB_NAME}${ARROW_SHARED_LIBRARY_SUFFIX} PATHS ${ARROW_BFS_LIB_DIR} ${ARROW_LIB_DIR} ${ARROW_LIB64_DIR} NO_DEFAULT_PATH)
+  if(NOT FLIGHT_LIB)
+      message(FATAL_ERROR "Arrow-flight Library Not Found")
+  else()
+      message(STATUS "Arrow-flight Library Can Be Found in ${GANDIVA_LIB}")
+  endif()
+
+  #JACKY XXX HACK HACK REMOVE !!
+
+  #file(COPY "/home/yromano/projects/jni3/tools/build/arrow_install/lib/libarrow_flight.so.400" DESTINATION ${root_directory}/releases/ FOLLOW_SYMLINK_CHAIN)
   file(COPY ${ARROW_LIB} DESTINATION ${root_directory}/releases/ FOLLOW_SYMLINK_CHAIN)
   file(COPY ${GANDIVA_LIB} DESTINATION ${root_directory}/releases/ FOLLOW_SYMLINK_CHAIN)
+  file(COPY ${FLIGHT_LIB} DESTINATION ${root_directory}/releases/ FOLLOW_SYMLINK_CHAIN)
 
   if(EXISTS ${ARROW_BFS_INCLUDE_DIR})
     message(STATUS "COPY and Set Arrow Header to: ${ARROW_BFS_INCLUDE_DIR}")
@@ -443,24 +461,29 @@ set(SPARK_COLUMNAR_PLUGIN_SRCS
         ${PROTO_SRCS}
         compute/protobuf_utils.cc
         compute/substrait_utils.cc
+        compute/xiphos_parser.h
+        compute/xiphos_parser.cc
         operators/c2r/columnar_to_row_converter.cc
         operators/shuffle/splitter.cc
         )
 
 file(MAKE_DIRECTORY ${root_directory}/releases)
+include_directories(/usr/neuroblade/nb-daxl/include)
 add_library(spark_columnar_jni SHARED ${SPARK_COLUMNAR_PLUGIN_SRCS})
 add_dependencies(spark_columnar_jni jni_proto)
+
+#link_directories(/usr/neuroblade/nb-daxl/lib)
+set(NB_LIBRARIES /usr/neuroblade/nb-daxl/lib/libneuroblade-daxl.so)
+target_link_libraries(spark_columnar_jni LINK_PRIVATE ${NB_LIBRARIES})
 
 if(BUILD_PROTOBUF)
   build_protobuf()
   message(STATUS "Building ProtoBuf from Source: ${BUILD_PROTOBUF}")
-  target_link_libraries(spark_columnar_jni
-                        LINK_PRIVATE protobuf::libprotobuf)
+  target_link_libraries(spark_columnar_jni LINK_PRIVATE protobuf::libprotobuf)
 else()
   find_protobuf()
   message(STATUS "Use existing ProtoBuf libraries: ${PROTOBUF_LIBRARY}")
-  target_link_libraries(spark_columnar_jni
-                        LINK_PUBLIC ${PROTOBUF_LIBRARY})
+  target_link_libraries(spark_columnar_jni LINK_PUBLIC ${PROTOBUF_LIBRARY})
 endif()
 
 add_custom_command(OUTPUT ${PROTO_OUTPUT_FILES}
@@ -512,3 +535,5 @@ install(FILES ${source_root_directory}/resources/libhdfs.so
 install(FILES ${source_root_directory}/resources/libprotobuf.so.13
         DESTINATION ${CMAKE_INSTALL_LIBDIR})
 add_subdirectory(plan_tester)
+
+

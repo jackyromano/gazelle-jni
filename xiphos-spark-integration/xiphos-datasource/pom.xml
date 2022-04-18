@@ -17,6 +17,11 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.intel.oap</groupId>
+            <artifactId>gazelle-jni-jvm</artifactId>
+            <version>1.2.0-snapshot</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.binary.version}</artifactId>
         </dependency>
@@ -169,3 +174,4 @@
     </plugins>
 </build>
 </project>
+

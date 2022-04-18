@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#pragma once
 #include "substrait/algebra.pb.h"
 #include "substrait/capabilities.pb.h"
 #include "substrait/extensions/extensions.pb.h"

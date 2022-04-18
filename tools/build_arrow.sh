@@ -67,12 +67,12 @@ if [ $BUILD_ARROW == "ON" ]; then
 
     cmake ./cpp \
         -DARROW_BUILD_STATIC=OFF -DARROW_BUILD_SHARED=ON -DARROW_COMPUTE=ON \
-            -DARROW_S3=ON \
+            -DARROW_S3=OFF \
             -DARROW_GANDIVA_JAVA=ON \
             -DARROW_GANDIVA=ON \
             -DARROW_PARQUET=ON \
             -DARROW_ORC=ON \
-            -DARROW_HDFS=ON \
+            -DARROW_HDFS=OFF \
             -DARROW_BOOST_USE_SHARED=OFF \
             -DARROW_JNI=ON \
             -DARROW_DATASET=ON \
@@ -86,7 +86,7 @@ if [ $BUILD_ARROW == "ON" ]; then
             -DARROW_FILESYSTEM=ON \
             -DARROW_JSON=ON \
             -DARROW_CSV=ON \
-            -DARROW_FLIGHT=OFF \
+            -DARROW_FLIGHT=ON \
             -DARROW_JEMALLOC=ON \
             -DARROW_SIMD_LEVEL=AVX2 \
             -DARROW_RUNTIME_SIMD_LEVEL=MAX \
